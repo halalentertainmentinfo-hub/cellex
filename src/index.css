@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  
+  --color-ios-orange: #ff6b00;
+  --color-ios-gold: #ff9e00;
+  --color-ios-dark: #000000;
+  --color-ios-light: #ffffff;
+
+  --animate-gradient: gradient 8s ease infinite;
+  --animate-ios-float: ios-float 5s ease-in-out infinite;
+
+  @keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes ios-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+}
+
+@layer base {
+  :root {
+    --background: #e0e5ec;
+    --foreground: #44475a;
+    --glass-bg: rgba(224, 229, 236, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --card-bg: #e0e5ec;
+    --text-secondary: rgba(68, 71, 90, 0.6);
+    --neu-shadow-dark: #a3b1c6;
+    --neu-shadow-light: #ffffff;
+  }
+
+  .dark {
+    --background: #1a1a1a;
+    --foreground: #e0e0e0;
+    --glass-bg: rgba(26, 26, 26, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.05);
+    --card-bg: #1a1a1a;
+    --text-secondary: rgba(224, 224, 224, 0.6);
+    --neu-shadow-dark: #000000;
+    --neu-shadow-light: #2a2a2a;
+  }
+
+  body {
+    @apply bg-[var(--background)] text-[var(--foreground)] selection:bg-ios-orange/30 antialiased overflow-x-hidden transition-colors duration-700;
+    font-family: var(--font-sans);
+    letter-spacing: -0.011em;
+  }
+}
+
+@layer utilities {
+  .neu-flat {
+    background: var(--card-bg);
+    box-shadow: 9px 9px 16px var(--neu-shadow-dark), 
+                -9px -9px 16px var(--neu-shadow-light);
+    @apply rounded-[2.5rem];
+  }
+
+  .neu-inset {
+    background: var(--card-bg);
+    box-shadow: inset 6px 6px 12px var(--neu-shadow-dark), 
+                inset -6px -6px 12px var(--neu-shadow-light);
+    @apply rounded-[2.5rem];
+  }
+
+  .neu-button {
+    background: var(--card-bg);
+    box-shadow: 6px 6px 12px var(--neu-shadow-dark), 
+                -6px -6px 12px var(--neu-shadow-light);
+    @apply rounded-full transition-all duration-300 active:shadow-[inset_4px_4px_8px_var(--neu-shadow-dark),inset_-4px_-4px_8px_var(--neu-shadow-light)];
+  }
+
+  .ios-glass {
+    @apply backdrop-blur-[30px] saturate-[1.8] bg-[var(--glass-bg)] border border-[var(--glass-border)];
+  }
+  
+  .ios-card {
+    background: var(--card-bg);
+    box-shadow: 9px 9px 16px var(--neu-shadow-dark), 
+                -9px -9px 16px var(--neu-shadow-light);
+    @apply rounded-[2.5rem] border border-white/20 transition-all duration-500;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-ios-orange via-ios-gold to-ios-orange bg-[length:200%_auto] animate-gradient;
+  }
+
+  .ios-button-primary {
+    background: var(--card-bg);
+    box-shadow: 6px 6px 12px var(--neu-shadow-dark), 
+                -6px -6px 12px var(--neu-shadow-light);
+    @apply rounded-full transition-all duration-300 active:shadow-[inset_4px_4px_8px_var(--neu-shadow-dark),inset_-4px_-4px_8px_var(--neu-shadow-light)] px-6 py-3 font-semibold text-ios-orange hover:text-ios-gold;
+  }
+
+  .ios-button-secondary {
+    background: var(--card-bg);
+    box-shadow: 6px 6px 12px var(--neu-shadow-dark), 
+                -6px -6px 12px var(--neu-shadow-light);
+    @apply rounded-full transition-all duration-300 active:shadow-[inset_4px_4px_8px_var(--neu-shadow-dark),inset_-4px_-4px_8px_var(--neu-shadow-light)] px-6 py-3 font-semibold opacity-70 hover:opacity-100;
+  }
+}
+
+.bg-glow {
+  @apply fixed -z-10 blur-[120px] rounded-full opacity-30 pointer-events-none;
+  background: radial-gradient(circle at center, #ff6b00 0%, transparent 70%);
+}
+

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from './lib/supabase';
+import { toast } from 'sonner';
 
 export interface Product {
   id: string;
@@ -550,6 +551,12 @@ export const useNotificationStore = create<NotificationStore>()(
         }
       },
       addNotification: async (notif) => {
+        // Show toast for new notification
+        toast(notif.title, {
+          description: notif.message,
+          icon: notif.type === 'success' ? '✅' : notif.type === 'warning' ? '⚠️' : 'ℹ️',
+        });
+
         if (supabase) {
           try {
             const { data, error } = await supabase.from('notifications').insert([{

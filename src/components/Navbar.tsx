@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShoppingCart, User, Search, Menu, X, ChevronRight, Moon, Sun, Bell, Trash2 } from 'lucide-react';
+import { ShoppingCart, User, Search, Menu, X, ChevronRight, Moon, Sun, Bell, Trash2, CheckCircle } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCartStore, useAuthStore, useThemeStore, useNotificationStore } from '../store';
 import { cn } from '../lib/utils';
@@ -122,15 +122,27 @@ export const Navbar = () => {
                             key={n.id} 
                             onClick={() => markAsRead(n.id)}
                             className={cn(
-                              "p-4 border-b border-black/5 last:border-0 cursor-pointer transition-colors",
+                              "p-4 border-b border-black/5 last:border-0 cursor-pointer transition-all flex gap-4",
                               !n.read ? "bg-ios-orange/5" : "hover:bg-black/5"
                             )}
                           >
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-bold">{n.title}</span>
-                              <span className="text-[9px] opacity-40">{new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            <div className={cn(
+                              "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                              n.type === 'success' ? "bg-green-500/10 text-green-500" :
+                              n.type === 'warning' ? "bg-yellow-500/10 text-yellow-500" :
+                              "bg-ios-orange/10 text-ios-orange"
+                            )}>
+                              {n.type === 'success' ? <CheckCircle size={14} /> : 
+                               n.type === 'warning' ? <Bell size={14} /> : 
+                               <Bell size={14} />}
                             </div>
-                            <p className="text-xs opacity-60 line-clamp-2">{n.message}</p>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs font-bold truncate pr-2">{n.title}</span>
+                                <span className="text-[9px] opacity-40 whitespace-nowrap">{new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
+                              <p className="text-[11px] opacity-60 line-clamp-2 leading-relaxed">{n.message}</p>
+                            </div>
                           </div>
                         ))
                       ) : (

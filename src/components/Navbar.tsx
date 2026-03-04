@@ -48,11 +48,11 @@ export const Navbar = () => {
           isScrolled ? 'scale-95' : 'scale-100'
         )}>
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/" className="flex items-center gap-2 group shrink-0">
             <div className="w-10 h-10 neu-button flex items-center justify-center group-hover:rotate-12 transition-transform duration-500 overflow-hidden rounded-full">
               <img src={LOGO_URL} alt="Cellex Logo" className="w-full h-full object-cover rounded-full" referrerPolicy="no-referrer" />
             </div>
-            <span className="text-2xl font-display font-bold tracking-tighter">CELLEX</span>
+            <span className="text-2xl font-display font-bold tracking-tighter hidden sm:block">CELLEX</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -76,10 +76,10 @@ export const Navbar = () => {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button 
               onClick={toggleTheme}
-              className="w-10 h-10 neu-button flex items-center justify-center transition-all duration-300 active:scale-90"
+              className="w-10 h-10 neu-button hidden sm:flex items-center justify-center transition-all duration-300 active:scale-90"
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -147,7 +147,7 @@ export const Navbar = () => {
 
             <button 
               onClick={() => setIsSearchOpen(true)}
-              className="w-10 h-10 neu-button flex items-center justify-center transition-all duration-300 active:scale-90"
+              className="w-10 h-10 neu-button hidden sm:flex items-center justify-center transition-all duration-300 active:scale-90"
             >
               <Search size={18} className="opacity-60" />
             </button>
@@ -190,6 +190,29 @@ export const Navbar = () => {
               <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           ))}
+          <div className="h-px bg-black/5 my-2" />
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={() => {
+                toggleTheme();
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-3 text-sm font-bold opacity-60"
+            >
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              Toggle Theme
+            </button>
+            <button 
+              onClick={() => {
+                setIsSearchOpen(true);
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-3 text-sm font-bold opacity-60"
+            >
+              <Search size={18} />
+              Search
+            </button>
+          </div>
         </div>
       </motion.div>
 

@@ -86,11 +86,35 @@ export const AdminDashboard = () => {
     price: 0,
     category: 'Smartphones',
     brand: '',
-    images: ['https://picsum.photos/seed/new/800/800'],
+    images: [] as string[],
     specs: {},
     stock: 10,
     description: ''
   });
+
+  const [uploading, setUploading] = React.useState(false);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setNewProduct(prev => ({
+        ...prev,
+        images: [base64String]
+      }));
+      setUploading(false);
+      toast.success('Image uploaded successfully!');
+    };
+    reader.onerror = () => {
+      setUploading(false);
+      toast.error('Failed to upload image');
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleLogout = () => {
     logout();
@@ -99,6 +123,10 @@ export const AdminDashboard = () => {
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (newProduct.images.length === 0) {
+      toast.error('Please upload a product image');
+      return;
+    }
     await addProduct(newProduct);
     setIsAddingProduct(false);
     setNewProduct({
@@ -106,7 +134,7 @@ export const AdminDashboard = () => {
       price: 0,
       category: 'Smartphones',
       brand: '',
-      images: ['https://picsum.photos/seed/new/800/800'],
+      images: [],
       specs: {},
       stock: 10,
       description: ''
@@ -714,6 +742,33 @@ export const AdminDashboard = () => {
                     onChange={(e) => setNewProduct({...newProduct, brand: e.target.value})}
                     className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
                   />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Product Image</label>
+                <div className="flex items-center gap-4">
+                  <div className="w-20 h-20 neu-inset rounded-xl overflow-hidden flex items-center justify-center bg-black/5">
+                    {newProduct.images[0] ? (
+                      <img src={newProduct.images[0]} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <Package size={24} className="opacity-20" />
+                    )}
+                  </div>
+                  <label className="flex-1">
+                    <div className={cn(
+                      "neu-button py-3 px-4 text-xs font-bold text-center cursor-pointer transition-all",
+                      uploading && "opacity-50 cursor-not-allowed"
+                    )}>
+                      {uploading ? 'Processing...' : 'Choose Image'}
+                    </div>
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
                 </div>
               </div>
               <div className="space-y-2">

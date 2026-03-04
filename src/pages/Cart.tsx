@@ -12,6 +12,8 @@ export const Cart = () => {
   const { addOrder } = useOrderStore();
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = React.useState<'card' | 'cod'>('cod');
+  const [address, setAddress] = React.useState('');
+  const [phone, setPhone] = React.useState(user?.phone || '');
 
   const handleCheckout = async () => {
     if (items.length === 0) return;
@@ -22,13 +24,18 @@ export const Cart = () => {
       return;
     }
 
+    if (!address.trim() || !phone.trim()) {
+      toast.error('Please provide shipping address and phone number');
+      return;
+    }
+
     // Save order to store
     await addOrder({
       userId: user.id,
       userName: user.name || user.email.split('@')[0],
       items: [...items],
       total: total * 1.08, // Including estimated tax
-    });
+    }, address, phone);
 
     toast.success('Order placed successfully!', {
       description: paymentMethod === 'card' ? 'Payment processed via Card.' : 'Cash on delivery confirmed.',
@@ -161,6 +168,32 @@ export const Cart = () => {
                 <div className="flex justify-between text-2xl font-bold tracking-tight">
                   <span>Total</span>
                   <span className="text-ios-orange">{formatPrice(total * 1.08)}</span>
+                </div>
+              </div>
+
+              <div className="space-y-4 mb-8">
+                <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Shipping Details</label>
+                <div className="space-y-3">
+                  <div className="neu-inset px-4 py-3 flex items-center gap-3">
+                    <Truck size={16} className="opacity-30" />
+                    <input 
+                      type="text" 
+                      placeholder="Shipping Address" 
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="bg-transparent border-none outline-none text-sm w-full"
+                    />
+                  </div>
+                  <div className="neu-inset px-4 py-3 flex items-center gap-3">
+                    <RotateCcw size={16} className="opacity-30" />
+                    <input 
+                      type="tel" 
+                      placeholder="Phone Number" 
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="bg-transparent border-none outline-none text-sm w-full"
+                    />
+                  </div>
                 </div>
               </div>
 

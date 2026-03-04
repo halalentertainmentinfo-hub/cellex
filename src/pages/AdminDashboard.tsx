@@ -21,7 +21,8 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Download
+  Download,
+  RefreshCw
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice, cn } from '../lib/utils';
@@ -31,13 +32,28 @@ import { useUserStore, useOrderStore, useAuthStore, useProductStore, useOrderReq
 import { toast } from 'sonner';
 
 export const AdminDashboard = () => {
-  const { users } = useUserStore();
-  const { orders, updateOrderStatus } = useOrderStore();
-  const { products, addProduct } = useProductStore();
-  const { requests, updateRequestStatus } = useOrderRequestStore();
-  const { addNotification } = useNotificationStore();
+  const { orders, updateOrderStatus, fetchOrders } = useOrderStore();
+  const { products, addProduct, fetchProducts } = useProductStore();
+  const { requests, updateRequestStatus, fetchRequests } = useOrderRequestStore();
+  const { notifications, addNotification, fetchNotifications } = useNotificationStore();
+  const { users, fetchUsers } = useUserStore();
   const { logout } = useAuthStore();
   const navigate = useNavigate();
+
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.all([
+      fetchOrders(),
+      fetchProducts(),
+      fetchRequests(),
+      fetchNotifications(),
+      fetchUsers()
+    ]);
+    setIsRefreshing(false);
+    toast.success('Data refreshed!');
+  };
 
   const [activeTab, setActiveTab] = React.useState<'dashboard' | 'users' | 'orders' | 'confirmed' | 'cancelled' | 'products' | 'requests' | 'notifications'>('dashboard');
   const [isAddingProduct, setIsAddingProduct] = React.useState(false);
@@ -120,6 +136,14 @@ export const AdminDashboard = () => {
             <p className="text-[var(--text-secondary)] font-medium">Management system for Cellex Premium Store.</p>
           </div>
           <div className="flex gap-4">
+            <button 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="neu-button flex items-center gap-2 px-6 py-3"
+            >
+              <RefreshCw size={20} className={cn(isRefreshing && "animate-spin text-ios-orange")} />
+              Refresh
+            </button>
             <button 
               onClick={handleLogout}
               className="neu-button flex items-center gap-2 text-red-500 px-6 py-3"
@@ -358,6 +382,8 @@ export const AdminDashboard = () => {
                         <td className="px-8 py-6 font-mono text-ios-orange">{order.id}</td>
                         <td className="px-8 py-6">
                           <div className="font-bold">{order.userName}</div>
+                          <div className="text-[10px] font-bold text-ios-orange mb-1">{order.userPhone}</div>
+                          <div className="text-[10px] opacity-60 mb-1 line-clamp-1">{order.address}</div>
                           <div className="text-[10px] opacity-40">{new Date(order.createdAt).toLocaleString()}</div>
                         </td>
                         <td className="px-8 py-6">

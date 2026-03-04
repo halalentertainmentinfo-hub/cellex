@@ -202,6 +202,8 @@ export interface Order {
   id: string;
   userId: string;
   userName: string;
+  userPhone?: string;
+  address?: string;
   items: CartItem[];
   total: number;
   status: 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
@@ -383,6 +385,7 @@ export const useOrderStore = create<OrderStore>()(
             .from('orders')
             .select(`
               *,
+              profiles (*),
               order_items (
                 *,
                 products (*)
@@ -397,6 +400,8 @@ export const useOrderStore = create<OrderStore>()(
               id: o.id,
               userId: o.user_id,
               userName: o.profiles?.name || 'User',
+              userPhone: o.phone || o.profiles?.phone || 'Not provided',
+              address: o.address || 'Not provided',
               total: Number(o.total),
               status: o.status.toUpperCase(),
               createdAt: o.created_at,

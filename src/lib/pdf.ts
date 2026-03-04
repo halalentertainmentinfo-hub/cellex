@@ -27,7 +27,9 @@ export const generateOrderPDF = (order: Order) => {
   doc.text('Customer Details', 20, 75);
   doc.setFontSize(10);
   doc.text(`Name: ${order.userName}`, 20, 82);
-  doc.text(`User ID: ${order.userId}`, 20, 89);
+  doc.text(`Phone: ${order.userPhone || 'Not provided'}`, 20, 89);
+  doc.text(`Address: ${order.address || 'Not provided'}`, 20, 96);
+  doc.text(`User ID: ${order.userId}`, 20, 103);
 
   // Table
   const tableData = order.items.map(item => [
@@ -39,7 +41,7 @@ export const generateOrderPDF = (order: Order) => {
   ]);
 
   autoTable(doc, {
-    startY: 100,
+    startY: 115,
     head: [['Product', 'Brand', 'Qty', 'Price', 'Subtotal']],
     body: tableData,
     theme: 'striped',

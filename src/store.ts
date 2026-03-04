@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { supabase } from './lib/supabase';
 
 export interface Product {
   id: string;
@@ -119,34 +120,66 @@ export const useAuthStore = create<AuthStore>()(
 
 interface UserStore {
   users: User[];
-  registerUser: (user: Omit<User, 'id' | 'createdAt' | 'role'>) => void;
+  isLoading: boolean;
+  fetchUsers: () => Promise<void>;
+  registerUser: (user: Omit<User, 'id' | 'createdAt' | 'role'>) => Promise<void>;
   findUser: (email: string) => User | undefined;
 }
 
 export const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
-      users: [
-        {
-          id: 'admin-1',
-          name: 'Admin',
-          email: 'admin@cellex.com',
-          phone: '0000000000',
-          password: 'admin123',
-          role: 'admin',
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 'admin-2',
-          name: 'Arvin Hanif',
-          email: 'arvin_hanif',
-          phone: '0000000000',
-          password: 'arvin_hanif',
-          role: 'admin',
-          createdAt: new Date().toISOString(),
+      users: [],
+      isLoading: false,
+      fetchUsers: async () => {
+        if (!supabase) return;
+        set({ isLoading: true });
+        try {
+          const { data, error } = await supabase.from('profiles').select('*');
+          if (error) throw error;
+          if (data && data.length > 0) {
+            const formattedUsers: User[] = data.map(u => ({
+              id: u.id,
+              name: u.name || u.email.split('@')[0],
+              email: u.email,
+              phone: u.phone || '',
+              role: u.role as 'user' | 'admin',
+              createdAt: u.created_at,
+              profileImage: u.avatar_url
+            }));
+            set({ users: formattedUsers });
+          }
+        } catch (error) {
+          console.error('Error fetching users:', error);
+        } finally {
+          set({ isLoading: false });
         }
-      ],
-      registerUser: (userData) => {
+      },
+      registerUser: async (userData) => {
+        if (supabase) {
+          try {
+            // This is a simplified version. In a real app, you'd use supabase.auth.signUp
+            const { data, error } = await supabase.from('profiles').insert([{
+              name: userData.name,
+              email: userData.email,
+              role: 'user'
+            }]).select();
+            if (error) throw error;
+            if (data) {
+              const newUser: User = {
+                ...userData,
+                id: data[0].id,
+                role: 'user',
+                createdAt: data[0].created_at,
+              };
+              set({ users: [...get().users, newUser] });
+              return;
+            }
+          } catch (error) {
+            console.error('Error registering user in Supabase:', error);
+          }
+        }
+
         const newUser: User = {
           ...userData,
           id: Math.random().toString(36).substring(7),
@@ -187,78 +220,61 @@ export interface OrderRequest {
 
 interface ProductStore {
   products: Product[];
-  addProduct: (product: Omit<Product, 'id'>) => void;
-  removeProduct: (productId: string) => void;
+  isLoading: boolean;
+  fetchProducts: () => Promise<void>;
+  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
+  removeProduct: (productId: string) => Promise<void>;
 }
 
 export const useProductStore = create<ProductStore>()(
   persist(
     (set, get) => ({
-      products: [
-        {
-          id: '1',
-          name: 'iPhone 16 Pro Max',
-          price: 185000,
-          category: 'Smartphones',
-          brand: 'Apple',
-          images: ['https://picsum.photos/seed/iphone16/800/800'],
-          specs: { display: '6.9" Super Retina XDR', chip: 'A18 Pro', camera: '48MP Fusion' },
-          stock: 50,
-          description: 'The ultimate iPhone with the largest display ever and the most powerful chip.'
-        },
-        {
-          id: '2',
-          name: 'MacBook Pro M4',
-          price: 245000,
-          category: 'Laptops',
-          brand: 'Apple',
-          images: ['https://picsum.photos/seed/macbookm4/800/800'],
-          specs: { display: '14" Liquid Retina XDR', chip: 'M4 Max', ram: '32GB' },
-          stock: 20,
-          description: 'The most advanced laptop for demanding workflows.'
-        },
-        {
-          id: '3',
-          name: 'Sony WH-1000XM5',
-          price: 45000,
-          category: 'Audio',
-          brand: 'Sony',
-          images: ['https://picsum.photos/seed/sonyh5/800/800'],
-          specs: { battery: '30 hours', noise_cancelling: 'Industry Leading', driver: '30mm' },
-          stock: 100,
-          description: 'Your world, nothing else. Best-in-class noise cancellation.'
-        },
-        {
-          id: '4',
-          name: 'Samsung Galaxy Watch Ultra',
-          price: 75000,
-          category: 'Wearables',
-          brand: 'Samsung',
-          images: ['https://picsum.photos/seed/galaxywatch/800/800'],
-          specs: { display: 'Sapphire Crystal', battery: '100 hours', water_resistance: '10ATM' },
-          stock: 35,
-          description: 'The most rugged and capable Galaxy Watch yet.'
-        },
-        {
-          id: '5',
-          name: 'iPad Pro M4',
-          price: 125000,
-          category: 'Tablets',
-          brand: 'Apple',
-          images: ['https://picsum.photos/seed/ipadpro/800/800'],
-          specs: { display: 'Ultra Retina XDR', chip: 'M4', thickness: '5.1mm' },
-          stock: 45,
-          description: 'Thinner than ever, more powerful than imaginable.'
+      products: [],
+      isLoading: false,
+      fetchProducts: async () => {
+        if (!supabase) return;
+        set({ isLoading: true });
+        try {
+          const { data, error } = await supabase.from('products').select('*');
+          if (error) throw error;
+          if (data && data.length > 0) {
+            set({ products: data });
+          }
+        } catch (error) {
+          console.error('Error fetching products:', error);
+        } finally {
+          set({ isLoading: false });
         }
-      ],
-      addProduct: (productData) => {
+      },
+      addProduct: async (productData) => {
+        if (supabase) {
+          try {
+            const { data, error } = await supabase.from('products').insert([productData]).select();
+            if (error) throw error;
+            if (data) {
+              set({ products: [...get().products, data[0]] });
+              return;
+            }
+          } catch (error) {
+            console.error('Error adding product to Supabase:', error);
+          }
+        }
+        
         const newProduct: Product = {
           ...productData,
           id: Math.random().toString(36).substring(7),
         };
         set({ products: [...get().products, newProduct] });
       },
-      removeProduct: (productId) => {
+      removeProduct: async (productId) => {
+        if (supabase) {
+          try {
+            const { error } = await supabase.from('products').delete().eq('id', productId);
+            if (error) throw error;
+          } catch (error) {
+            console.error('Error removing product from Supabase:', error);
+          }
+        }
         set({ products: get().products.filter((p) => p.id !== productId) });
       },
     }),
@@ -270,15 +286,54 @@ export const useProductStore = create<ProductStore>()(
 
 interface OrderRequestStore {
   requests: OrderRequest[];
-  addRequest: (request: Omit<OrderRequest, 'id' | 'createdAt' | 'status'>) => void;
-  updateRequestStatus: (requestId: string, status: OrderRequest['status']) => void;
+  fetchRequests: () => Promise<void>;
+  addRequest: (request: Omit<OrderRequest, 'id' | 'createdAt' | 'status'>) => Promise<void>;
+  updateRequestStatus: (requestId: string, status: OrderRequest['status']) => Promise<void>;
 }
 
 export const useOrderRequestStore = create<OrderRequestStore>()(
   persist(
     (set, get) => ({
       requests: [],
-      addRequest: (requestData) => {
+      fetchRequests: async () => {
+        if (!supabase) return;
+        try {
+          const { data, error } = await supabase.from('order_requests').select('*').order('created_at', { ascending: false });
+          if (error) throw error;
+          if (data) {
+            set({ requests: data.map((r: any) => ({
+              id: r.id,
+              userId: r.user_id,
+              userName: r.user_name,
+              productName: r.product_name,
+              description: r.description,
+              status: r.status,
+              createdAt: r.created_at
+            })) });
+          }
+        } catch (error) {
+          console.error('Error fetching requests:', error);
+        }
+      },
+      addRequest: async (requestData) => {
+        if (supabase) {
+          try {
+            const { data, error } = await supabase.from('order_requests').insert([{
+              user_id: requestData.userId,
+              user_name: requestData.userName,
+              product_name: requestData.productName,
+              description: requestData.description,
+              status: 'Pending'
+            }]).select();
+            if (error) throw error;
+            if (data) {
+              set({ requests: [data[0], ...get().requests] });
+              return;
+            }
+          } catch (error) {
+            console.error('Error adding request:', error);
+          }
+        }
         const newRequest: OrderRequest = {
           ...requestData,
           id: `REQ-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -287,7 +342,15 @@ export const useOrderRequestStore = create<OrderRequestStore>()(
         };
         set({ requests: [newRequest, ...get().requests] });
       },
-      updateRequestStatus: (requestId, status) => {
+      updateRequestStatus: async (requestId, status) => {
+        if (supabase) {
+          try {
+            const { error } = await supabase.from('order_requests').update({ status }).eq('id', requestId);
+            if (error) throw error;
+          } catch (error) {
+            console.error('Error updating request status:', error);
+          }
+        }
         set({
           requests: get().requests.map((r) =>
             r.id === requestId ? { ...r, status } : r
@@ -303,15 +366,92 @@ export const useOrderRequestStore = create<OrderRequestStore>()(
 
 interface OrderStore {
   orders: Order[];
-  addOrder: (order: Omit<Order, 'id' | 'createdAt' | 'status'>) => void;
-  updateOrderStatus: (orderId: string, status: Order['status']) => void;
+  fetchOrders: () => Promise<void>;
+  addOrder: (order: Omit<Order, 'id' | 'createdAt' | 'status'>, address?: string, phone?: string) => Promise<void>;
+  updateOrderStatus: (orderId: string, status: Order['status']) => Promise<void>;
 }
 
 export const useOrderStore = create<OrderStore>()(
   persist(
     (set, get) => ({
       orders: [],
-      addOrder: (orderData) => {
+      fetchOrders: async () => {
+        if (!supabase) return;
+        try {
+          // Fetch orders and their items
+          const { data: ordersData, error: ordersError } = await supabase
+            .from('orders')
+            .select(`
+              *,
+              order_items (
+                *,
+                products (*)
+              )
+            `)
+            .order('created_at', { ascending: false });
+
+          if (ordersError) throw ordersError;
+
+          if (ordersData) {
+            const formattedOrders: Order[] = ordersData.map((o: any) => ({
+              id: o.id,
+              userId: o.user_id,
+              userName: o.profiles?.name || 'User',
+              total: Number(o.total),
+              status: o.status.toUpperCase(),
+              createdAt: o.created_at,
+              items: o.order_items.map((item: any) => ({
+                ...item.products,
+                quantity: item.quantity,
+                price: Number(item.price_at_purchase)
+              }))
+            }));
+            set({ orders: formattedOrders });
+          }
+        } catch (error) {
+          console.error('Error fetching orders:', error);
+        }
+      },
+      addOrder: async (orderData, address = 'Not provided', phone = 'Not provided') => {
+        if (supabase) {
+          try {
+            // 1. Create Order
+            const { data: order, error: orderError } = await supabase
+              .from('orders')
+              .insert([{
+                user_id: orderData.userId,
+                total: orderData.total,
+                status: 'Pending',
+                address,
+                phone
+              }])
+              .select()
+              .single();
+
+            if (orderError) throw orderError;
+
+            // 2. Create Order Items
+            const orderItems = orderData.items.map(item => ({
+              order_id: order.id,
+              product_id: item.id,
+              quantity: item.quantity,
+              price_at_purchase: item.price
+            }));
+
+            const { error: itemsError } = await supabase
+              .from('order_items')
+              .insert(orderItems);
+
+            if (itemsError) throw itemsError;
+
+            // Refresh orders
+            get().fetchOrders();
+            return;
+          } catch (error) {
+            console.error('Error adding order to Supabase:', error);
+          }
+        }
+
         const nextNum = get().orders.length + 1;
         const formattedNum = String(nextNum).padStart(4, '0');
         const newOrder: Order = {
@@ -322,7 +462,18 @@ export const useOrderStore = create<OrderStore>()(
         };
         set({ orders: [newOrder, ...get().orders] });
       },
-      updateOrderStatus: (orderId, status) => {
+      updateOrderStatus: async (orderId, status) => {
+        if (supabase) {
+          try {
+            const { error } = await supabase
+              .from('orders')
+              .update({ status: status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() })
+              .eq('id', orderId);
+            if (error) throw error;
+          } catch (error) {
+            console.error('Error updating order status:', error);
+          }
+        }
         set({
           orders: get().orders.map((o) =>
             o.id === orderId ? { ...o, status } : o
@@ -364,7 +515,8 @@ export interface Notification {
 
 interface NotificationStore {
   notifications: Notification[];
-  addNotification: (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => void;
+  fetchNotifications: () => Promise<void>;
+  addNotification: (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => Promise<void>;
   markAsRead: (id: string) => void;
   clearAll: () => void;
 }
@@ -373,7 +525,43 @@ export const useNotificationStore = create<NotificationStore>()(
   persist(
     (set, get) => ({
       notifications: [],
-      addNotification: (notif) => {
+      fetchNotifications: async () => {
+        if (!supabase) return;
+        try {
+          const { data, error } = await supabase.from('notifications').select('*').order('created_at', { ascending: false });
+          if (error) throw error;
+          if (data) {
+            set({ notifications: data.map((n: any) => ({
+              id: n.id,
+              title: n.title,
+              message: n.message,
+              type: n.type,
+              read: n.read,
+              createdAt: n.created_at
+            })) });
+          }
+        } catch (error) {
+          console.error('Error fetching notifications:', error);
+        }
+      },
+      addNotification: async (notif) => {
+        if (supabase) {
+          try {
+            const { data, error } = await supabase.from('notifications').insert([{
+              title: notif.title,
+              message: notif.message,
+              type: notif.type,
+              read: false
+            }]).select();
+            if (error) throw error;
+            if (data) {
+              set({ notifications: [data[0], ...get().notifications] });
+              return;
+            }
+          } catch (error) {
+            console.error('Error adding notification:', error);
+          }
+        }
         const newNotif: Notification = {
           ...notif,
           id: Math.random().toString(36).substring(7),

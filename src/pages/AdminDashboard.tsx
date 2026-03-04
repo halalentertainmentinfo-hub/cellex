@@ -81,9 +81,9 @@ export const AdminDashboard = () => {
     navigate('/login');
   };
 
-  const handleAddProduct = (e: React.FormEvent) => {
+  const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    addProduct(newProduct);
+    await addProduct(newProduct);
     setIsAddingProduct(false);
     setNewProduct({
       name: '',
@@ -95,6 +95,7 @@ export const AdminDashboard = () => {
       stock: 10,
       description: ''
     });
+    toast.success('Product added successfully!');
   };
   
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
@@ -106,12 +107,8 @@ export const AdminDashboard = () => {
     { label: 'Total Users', value: users.length.toString(), icon: Users, color: 'text-ios-orange', bg: 'bg-ios-orange/10' },
   ];
 
-  // Display real orders, fallback to mock if empty for demo feel, 
-  // but the user wants to see their orders, so let's prioritize real ones.
-  const displayOrders = orders.length > 0 ? orders.slice(0, 5) : [
-    { id: '#ORD-7241', userName: 'Alex Rivera', items: [{ quantity: 2 }], total: 1598, status: 'Processing', createdAt: new Date(Date.now() - 120000).toISOString() },
-    { id: '#ORD-7240', userName: 'Sarah Chen', items: [{ quantity: 1 }], total: 399, status: 'Shipped', createdAt: new Date(Date.now() - 900000).toISOString() },
-  ];
+  // Display real orders
+  const displayOrders = orders.slice(0, 5);
 
   return (
     <div className="pt-32 pb-20 px-6 min-h-screen">

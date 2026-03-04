@@ -13,7 +13,7 @@ export const Cart = () => {
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = React.useState<'card' | 'cod'>('cod');
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (items.length === 0) return;
     
     if (!user) {
@@ -23,7 +23,7 @@ export const Cart = () => {
     }
 
     // Save order to store
-    addOrder({
+    await addOrder({
       userId: user.id,
       userName: user.name || user.email.split('@')[0],
       items: [...items],

@@ -20,27 +20,14 @@ export const AdminLogin = () => {
     const cleanPass = password.trim();
     
     // Search by email/ID
-    let user = findUser(cleanId);
+    const user = findUser(cleanId);
     
-    // Fallback for demo/hardcoded admin
-    if (!user && cleanId === 'arvin_hanif' && cleanPass === 'arvin_hanif') {
-      user = {
-        id: 'admin-2',
-        name: 'Arvin Hanif',
-        email: 'arvin_hanif',
-        phone: '0000000000',
-        password: 'arvin_hanif',
-        role: 'admin',
-        createdAt: new Date().toISOString(),
-      };
-    }
-
     if (user && user.role === 'admin' && user.password === cleanPass) {
       setUser(user);
       toast.success(`Welcome to Admin Portal, ${user.name}!`);
       navigate('/admin');
     } else {
-      toast.error('Invalid Admin ID or Password. Please use: arvin_hanif');
+      toast.error('Invalid Admin ID or Password.');
     }
   };
 

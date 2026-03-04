@@ -15,6 +15,7 @@ export const Home = () => {
   
   const unreadCount = notifications.filter(n => !n.read).length;
   
+  const heroProduct = products[0];
   const featuredProducts = products.slice(0, 4);
 
   const profileLink = user ? (user.role === 'admin' ? '/admin' : '/account') : '/login';
@@ -108,14 +109,18 @@ export const Home = () => {
           {/* Right Column - Hero */}
           <div className="neu-flat p-12 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden">
             <div className="flex-1 z-10">
-              <span className="text-ios-orange font-bold text-xs uppercase tracking-[0.3em] mb-4 block">New Arrival</span>
-              <h1 className="text-7xl font-display font-bold tracking-tighter mb-6 leading-none">iPhone 15 Pro</h1>
+              <span className="text-ios-orange font-bold text-xs uppercase tracking-[0.3em] mb-4 block">
+                {heroProduct ? 'Featured Product' : 'New Arrival'}
+              </span>
+              <h1 className="text-7xl font-display font-bold tracking-tighter mb-6 leading-none">
+                {heroProduct ? heroProduct.name : 'iPhone 15 Pro'}
+              </h1>
               <p className="text-xl opacity-60 max-w-sm leading-relaxed mb-8">
-                Titanium design. A17 Pro chip. A monster for gaming.
+                {heroProduct ? heroProduct.description : 'Titanium design. A17 Pro chip. A monster for gaming.'}
               </p>
               <div className="flex gap-4">
-                <Link to="/product/iphone-15-pro" className="ios-button-primary">
-                  Pre-order
+                <Link to={heroProduct ? `/product/${heroProduct.id}` : "/shop"} className="ios-button-primary">
+                  {heroProduct ? 'View Details' : 'Shop Now'}
                 </Link>
                 <div className="w-12 h-12 neu-button flex items-center justify-center">
                   <ChevronRight size={20} className="opacity-40" />
@@ -130,7 +135,7 @@ export const Home = () => {
                 className="relative w-full max-w-sm aspect-square"
               >
                 <img 
-                  src="https://picsum.photos/seed/iphone/800/800" 
+                  src={heroProduct ? heroProduct.images[0] : "https://picsum.photos/seed/iphone/800/800"} 
                   alt="Featured Product" 
                   className="w-full h-full object-contain drop-shadow-2xl"
                   referrerPolicy="no-referrer"
@@ -139,7 +144,9 @@ export const Home = () => {
               {/* Floating Badge */}
               <div className="absolute top-0 right-0 neu-button p-4 flex flex-col items-center">
                 <span className="text-[10px] font-bold opacity-40 uppercase">From</span>
-                <span className="text-xl font-display font-bold text-ios-orange">৳1,20,000</span>
+                <span className="text-xl font-display font-bold text-ios-orange">
+                  {heroProduct ? formatPrice(heroProduct.price) : '৳1,20,000'}
+                </span>
               </div>
             </div>
           </div>

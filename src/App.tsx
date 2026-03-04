@@ -11,7 +11,7 @@ import { AdminLogin } from './pages/AdminLogin';
 import { Register } from './pages/Register';
 import { Account } from './pages/Account';
 import { AdminDashboard } from './pages/AdminDashboard';
-import { useAuthStore, useThemeStore } from './store';
+import { useAuthStore, useThemeStore, useProductStore, useUserStore, useOrderStore, useOrderRequestStore, useNotificationStore } from './store';
 
 const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
   const { user } = useAuthStore();
@@ -24,6 +24,24 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
 
 export default function App() {
   const { theme } = useThemeStore();
+  const { fetchProducts } = useProductStore();
+  const { fetchUsers } = useUserStore();
+  const { fetchOrders } = useOrderStore();
+  const { fetchRequests } = useOrderRequestStore();
+  const { fetchNotifications } = useNotificationStore();
+
+  React.useEffect(() => {
+    const initData = async () => {
+      await Promise.all([
+        fetchProducts(),
+        fetchUsers(),
+        fetchOrders(),
+        fetchRequests(),
+        fetchNotifications()
+      ]);
+    };
+    initData();
+  }, []);
 
   React.useEffect(() => {
     const root = window.document.documentElement;

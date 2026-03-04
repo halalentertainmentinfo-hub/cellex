@@ -19,7 +19,7 @@ export const Register = () => {
   const { setUser } = useAuthStore();
   const navigate = useNavigate();
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
@@ -32,7 +32,7 @@ export const Register = () => {
       return;
     }
 
-    registerUser({ name, email, phone, password });
+    await registerUser({ name, email, phone, password });
     
     const newUser = findUser(email);
     if (newUser) {

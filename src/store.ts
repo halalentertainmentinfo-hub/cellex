@@ -130,7 +130,17 @@ interface UserStore {
 export const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
-      users: [],
+      users: [
+        {
+          id: 'admin-001',
+          name: 'Arvin Hanif',
+          email: 'arvin_hanif',
+          phone: '01700000000',
+          password: 'arvin_hanif',
+          role: 'admin',
+          createdAt: new Date().toISOString()
+        }
+      ],
       isLoading: false,
       fetchUsers: async () => {
         if (!supabase) return;
@@ -148,7 +158,36 @@ export const useUserStore = create<UserStore>()(
               createdAt: u.created_at,
               profileImage: u.avatar_url
             }));
+            
+            // Add default admin if not present
+            const defaultAdmin = {
+              id: 'admin-001',
+              name: 'Arvin Hanif',
+              email: 'arvin_hanif',
+              phone: '01700000000',
+              password: 'arvin_hanif',
+              role: 'admin' as const,
+              createdAt: new Date().toISOString()
+            };
+
+            if (!formattedUsers.some(u => u.email === defaultAdmin.email)) {
+              formattedUsers.push(defaultAdmin);
+            }
+
             set({ users: formattedUsers });
+          } else {
+            // If no users in DB, keep default admin
+            set({ users: [
+              {
+                id: 'admin-001',
+                name: 'Arvin Hanif',
+                email: 'arvin_hanif',
+                phone: '01700000000',
+                password: 'arvin_hanif',
+                role: 'admin',
+                createdAt: new Date().toISOString()
+              }
+            ] });
           }
         } catch (error) {
           console.error('Error fetching users:', error);

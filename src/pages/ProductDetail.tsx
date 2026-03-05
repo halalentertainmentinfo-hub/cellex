@@ -97,10 +97,10 @@ export const ProductDetail = () => {
                 </div>
               </div>
               
-              <h1 className="text-5xl font-display font-bold mb-2">{product.name}</h1>
-              <p className="text-xl text-white/40 font-medium mb-6">{product.brand}</p>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-2">{product.name}</h1>
+              <p className="text-lg sm:text-xl text-white/40 font-medium mb-6">{product.brand}</p>
               
-              <div className="text-4xl font-display font-bold text-gradient mb-8">
+              <div className="text-3xl sm:text-4xl font-display font-bold text-gradient mb-8">
                 {formatPrice(product.price)}
               </div>
               
@@ -121,8 +121,8 @@ export const ProductDetail = () => {
 
             {/* Actions */}
             <div className="mt-auto space-y-6">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-4 neu-inset p-1 rounded-2xl">
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                <div className="flex items-center justify-between w-full sm:w-auto gap-4 neu-inset p-1 rounded-2xl">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="w-12 h-12 neu-button flex items-center justify-center"
@@ -142,7 +142,7 @@ export const ProductDetail = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleAddToCart}
-                  className="flex-1 py-5 rounded-2xl ios-button-primary flex items-center justify-center gap-3"
+                  className="w-full sm:flex-1 py-5 rounded-2xl ios-button-primary flex items-center justify-center gap-3"
                 >
                   <ShoppingCart size={20} />
                   Add to Cart

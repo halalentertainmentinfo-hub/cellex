@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Search, Filter, SlidersHorizontal, Grid, List, ChevronDown, Zap } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { MOCK_PRODUCTS } from '../lib/supabase';
@@ -35,13 +35,15 @@ export const Shop = () => {
     return matchesSearch && matchesCategory && matchesPrice;
   });
 
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
+
   return (
     <div className="pt-32 pb-20 px-6 min-h-screen">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
           <div>
-            <h1 className="text-6xl font-display font-bold mb-4 tracking-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold mb-4 tracking-tight">
               {showCategoriesOnly ? 'Categories' : 'Explore'}
             </h1>
             <p className="text-[var(--text-secondary)] font-medium">
@@ -157,29 +159,38 @@ export const Shop = () => {
           {/* Product Grid */}
           <main>
             {/* Toolbar */}
-            <div className="flex items-center justify-between mb-10 neu-flat p-4 rounded-full px-8">
-              <div className="text-xs font-bold opacity-40 uppercase tracking-widest">
+            <div className="flex flex-col sm:flex-row items-center justify-between mb-10 neu-flat p-4 rounded-3xl sm:rounded-full px-8 gap-4 sm:gap-0">
+              <div className="text-xs font-bold opacity-40 uppercase tracking-widest w-full sm:w-auto text-center sm:text-left">
                 <span className="opacity-100 text-[var(--foreground)]">{filteredProducts.length}</span> results
               </div>
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2 neu-inset p-1 rounded-full">
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    className={cn("p-2 rounded-full transition-all", viewMode === 'grid' ? "neu-button text-ios-orange" : "opacity-40 hover:opacity-100")}
-                  >
-                    <Grid size={16} />
-                  </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={cn("p-2 rounded-full transition-all", viewMode === 'list' ? "neu-button text-ios-orange" : "opacity-40 hover:opacity-100")}
-                  >
-                    <List size={16} />
+              <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
+                <button 
+                  onClick={() => setIsFilterOpen(true)}
+                  className="lg:hidden flex items-center gap-2 px-5 py-2 neu-button text-xs font-bold uppercase tracking-widest"
+                >
+                  <Filter size={14} />
+                  Filters
+                </button>
+                <div className="flex items-center gap-6">
+                  <div className="hidden sm:flex items-center gap-2 neu-inset p-1 rounded-full">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={cn("p-2 rounded-full transition-all", viewMode === 'grid' ? "neu-button text-ios-orange" : "opacity-40 hover:opacity-100")}
+                    >
+                      <Grid size={16} />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={cn("p-2 rounded-full transition-all", viewMode === 'list' ? "neu-button text-ios-orange" : "opacity-40 hover:opacity-100")}
+                    >
+                      <List size={16} />
+                    </button>
+                  </div>
+                  <button className="flex items-center gap-2 px-5 py-2 neu-button text-xs font-bold uppercase tracking-widest">
+                    Sort
+                    <ChevronDown size={14} />
                   </button>
                 </div>
-                <button className="flex items-center gap-2 px-5 py-2 neu-button text-xs font-bold uppercase tracking-widest">
-                  Sort
-                  <ChevronDown size={14} />
-                </button>
               </div>
             </div>
 
@@ -204,6 +215,94 @@ export const Shop = () => {
             </div>
           </main>
         </div>
+        {/* Mobile Filter Drawer */}
+        <AnimatePresence>
+          {isFilterOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm lg:hidden"
+                onClick={() => setIsFilterOpen(false)}
+              />
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm z-[110] bg-[var(--background)] lg:hidden p-8 overflow-y-auto"
+              >
+                <div className="flex items-center justify-between mb-12">
+                  <h2 className="text-2xl font-bold tracking-tight">Filters</h2>
+                  <button onClick={() => setIsFilterOpen(false)} className="neu-button p-2">
+                    <ChevronDown className="rotate-90" size={20} />
+                  </button>
+                </div>
+
+                <div className="space-y-12">
+                  {/* Categories */}
+                  <div>
+                    <h3 className="text-xs font-bold mb-8 uppercase tracking-[0.2em] opacity-40">Categories</h3>
+                    <div className="space-y-2">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => {
+                            setSelectedCategory(cat);
+                            setIsFilterOpen(false);
+                          }}
+                          className={cn(
+                            "w-full text-left px-5 py-4 rounded-2xl transition-all duration-300 flex items-center justify-between group font-semibold",
+                            selectedCategory === cat 
+                              ? "bg-ios-orange text-white shadow-lg shadow-ios-orange/20" 
+                              : "hover:bg-white/5 opacity-60 hover:opacity-100"
+                          )}
+                        >
+                          {cat}
+                          <span className={cn(
+                            "text-[10px] px-2 py-0.5 rounded-full font-bold",
+                            selectedCategory === cat ? "bg-white/20" : "bg-white/10"
+                          )}>
+                            {cat === 'All' ? products.length : products.filter(p => p.category === cat).length}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Price Range */}
+                  <div>
+                    <h3 className="text-xs font-bold mb-8 uppercase tracking-[0.2em] opacity-40">Price Range</h3>
+                    <div className="px-2">
+                      <input
+                        type="range"
+                        min="0"
+                        max="500000"
+                        step="1000"
+                        value={priceRange}
+                        onChange={(e) => setPriceRange(Number(e.target.value))}
+                        className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-ios-orange"
+                      />
+                      <div className="flex justify-between mt-6 text-[10px] font-bold opacity-40 uppercase tracking-widest">
+                        <span>৳0</span>
+                        <span className="text-ios-orange opacity-100">৳{priceRange}</span>
+                        <span>৳500k+</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => setIsFilterOpen(false)}
+                    className="w-full py-4 ios-button-primary mt-8"
+                  >
+                    Apply Filters
+                  </button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

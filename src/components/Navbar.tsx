@@ -108,12 +108,23 @@ export const Navbar = () => {
                   >
                     <div className="p-4 border-b border-black/5 flex items-center justify-between">
                       <h3 className="text-sm font-bold uppercase tracking-widest opacity-40">Notifications</h3>
-                      <button 
-                        onClick={clearAll}
-                        className="text-[10px] font-bold text-ios-orange uppercase tracking-widest hover:underline"
-                      >
-                        Clear All
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button 
+                          onClick={() => {
+                            navigate('/notifications');
+                            setIsNotifOpen(false);
+                          }}
+                          className="text-[10px] font-bold text-ios-orange uppercase tracking-widest hover:underline"
+                        >
+                          View All
+                        </button>
+                        <button 
+                          onClick={clearAll}
+                          className="text-[10px] font-bold opacity-40 uppercase tracking-widest hover:underline"
+                        >
+                          Clear
+                        </button>
+                      </div>
                     </div>
                     <div className="max-h-96 overflow-y-auto">
                       {notifications.length > 0 ? (
@@ -190,19 +201,38 @@ export const Navbar = () => {
         animate={isMobileMenuOpen ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
         className="md:hidden overflow-hidden mt-4"
       >
-        <div className="neu-flat p-6 flex flex-col gap-4">
-          {navLinks.map((link) => (
+          <div className="neu-flat p-6 flex flex-col gap-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-lg font-medium flex items-center justify-between group"
+              >
+                {link.name}
+                <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            ))}
+            
+            {/* Mobile-only links */}
             <Link
-              key={link.name}
-              to={link.path}
+              to="/notifications"
               onClick={() => setIsMobileMenuOpen(false)}
               className="text-lg font-medium flex items-center justify-between group"
             >
-              {link.name}
+              <div className="flex items-center gap-3">
+                <Bell size={18} className="text-ios-orange" />
+                Notifications
+                {unreadCount > 0 && (
+                  <span className="w-5 h-5 bg-ios-orange text-[10px] font-bold flex items-center justify-center rounded-full text-white">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
               <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </Link>
-          ))}
-          <div className="h-px bg-black/5 my-2" />
+
+            <div className="h-px bg-black/5 my-2" />
           <div className="flex items-center justify-between">
             <button 
               onClick={() => {

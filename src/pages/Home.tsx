@@ -47,9 +47,9 @@ export const Home = () => {
     <div className="min-h-screen pt-24 pb-20 px-6">
       <div className="max-w-7xl mx-auto">
         {/* Top Navigation Bar (Neumorphic) */}
-        <div className="neu-flat p-4 mb-8 flex items-center justify-between px-8">
-          <div className="flex items-center gap-8">
-            <Link to="/" className="w-12 h-12 neu-button flex items-center justify-center overflow-hidden rounded-full">
+        <div className="neu-flat p-4 mb-8 flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 gap-4 sm:gap-0">
+          <div className="flex items-center justify-between w-full sm:w-auto gap-8">
+            <Link to="/" className="w-10 h-10 sm:w-12 sm:h-12 neu-button flex items-center justify-center overflow-hidden rounded-full">
               <img src={LOGO_URL} alt="Cellex Logo" className="w-full h-full object-cover rounded-full" referrerPolicy="no-referrer" />
             </Link>
             <nav className="hidden md:flex items-center gap-8 text-sm font-medium opacity-60">
@@ -57,10 +57,21 @@ export const Home = () => {
               <Link to="/shop" className="hover:opacity-100 transition-opacity">Shop</Link>
               <Link to="/shop?filter=categories" className="hover:opacity-100 transition-opacity">Categories</Link>
             </nav>
+            <div className="flex sm:hidden items-center gap-2">
+              <Link to="/notifications" className="w-10 h-10 neu-button flex items-center justify-center relative">
+                <Bell size={18} className={cn("opacity-60", unreadCount > 0 && "text-ios-orange opacity-100")} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-ios-orange rounded-full animate-pulse shadow-lg" />
+                )}
+              </Link>
+              <Link to={profileLink} className="w-10 h-10 neu-button flex items-center justify-center">
+                <User size={18} className="opacity-60" />
+              </Link>
+            </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <form onSubmit={handleHomeSearch} className="neu-inset px-6 py-2 flex items-center gap-3 w-64 group focus-within:ring-2 ring-ios-orange/20 transition-all">
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <form onSubmit={handleHomeSearch} className="neu-inset px-4 sm:px-6 py-2 flex items-center gap-3 flex-1 sm:w-64 group focus-within:ring-2 ring-ios-orange/20 transition-all">
               <Search size={16} className="opacity-40 group-focus-within:opacity-100 group-focus-within:text-ios-orange" />
               <input 
                 type="text" 
@@ -70,15 +81,17 @@ export const Home = () => {
                 className="bg-transparent border-none outline-none text-sm w-full opacity-60 group-focus-within:opacity-100"
               />
             </form>
-            <Link to={profileLink} className="w-10 h-10 neu-button flex items-center justify-center relative">
-              <Bell size={18} className={cn("opacity-60", unreadCount > 0 && "text-ios-orange opacity-100")} />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-3 h-3 bg-ios-orange rounded-full animate-pulse shadow-lg" />
-              )}
-            </Link>
-            <Link to={profileLink} className="w-10 h-10 neu-button flex items-center justify-center">
-              <User size={18} className="opacity-60" />
-            </Link>
+            <div className="hidden sm:flex items-center gap-4">
+              <Link to="/notifications" className="w-10 h-10 neu-button flex items-center justify-center relative">
+                <Bell size={18} className={cn("opacity-60", unreadCount > 0 && "text-ios-orange opacity-100")} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-3 h-3 bg-ios-orange rounded-full animate-pulse shadow-lg" />
+                )}
+              </Link>
+              <Link to={profileLink} className="w-10 h-10 neu-button flex items-center justify-center">
+                <User size={18} className="opacity-60" />
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -112,7 +125,7 @@ export const Home = () => {
               <span className="text-ios-orange font-bold text-xs uppercase tracking-[0.3em] mb-4 block">
                 {heroProduct ? 'Featured Product' : 'New Arrival'}
               </span>
-              <h1 className="text-7xl font-display font-bold tracking-tighter mb-6 leading-none">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-display font-bold tracking-tighter mb-6 leading-none">
                 {heroProduct ? heroProduct.name : 'iPhone 15 Pro'}
               </h1>
               <p className="text-xl opacity-60 max-w-sm leading-relaxed mb-8">

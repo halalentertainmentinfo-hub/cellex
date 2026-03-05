@@ -80,9 +80,9 @@ export const Cart = () => {
   return (
     <div className="pt-32 pb-20 px-6 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-6xl font-display font-bold mb-16 tracking-tight">Cart</h1>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold mb-10 sm:mb-16 tracking-tight">Cart</h1>
 
-        <div className="grid lg:grid-cols-[1fr_400px] gap-16">
+        <div className="grid lg:grid-cols-[1fr_400px] gap-12 sm:gap-16">
           {/* Items List */}
           <div className="space-y-6">
             <AnimatePresence mode="popLayout">

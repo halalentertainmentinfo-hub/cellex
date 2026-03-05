@@ -10,6 +10,7 @@ import { Login } from './pages/Login';
 import { AdminLogin } from './pages/AdminLogin';
 import { Register } from './pages/Register';
 import { Account } from './pages/Account';
+import { Notifications } from './pages/Notifications';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { useAuthStore, useThemeStore, useProductStore, useUserStore, useOrderStore, useOrderRequestStore, useNotificationStore } from './store';
 
@@ -72,6 +73,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Account />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/notifications" 
+            element={
+              <ProtectedRoute>
+                <Notifications />
               </ProtectedRoute>
             } 
           />

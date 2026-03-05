@@ -573,6 +573,7 @@ interface NotificationStore {
   fetchNotifications: () => Promise<void>;
   addNotification: (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => Promise<void>;
   markAsRead: (id: string) => void;
+  deleteNotification: (id: string) => void;
   clearAll: () => void;
 }
 
@@ -636,6 +637,11 @@ export const useNotificationStore = create<NotificationStore>()(
           notifications: get().notifications.map((n) =>
             n.id === id ? { ...n, read: true } : n
           ),
+        });
+      },
+      deleteNotification: (id) => {
+        set({
+          notifications: get().notifications.filter((n) => n.id !== id),
         });
       },
       clearAll: () => set({ notifications: [] }),

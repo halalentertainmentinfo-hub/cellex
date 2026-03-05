@@ -16,9 +16,10 @@ CREATE TABLE products (
 
 -- 2. Users Table (Extending Supabase Auth)
 CREATE TABLE profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id),
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT,
   email TEXT UNIQUE NOT NULL,
+  password TEXT, -- Added for simplified login in this demo
   avatar_url TEXT,
   role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

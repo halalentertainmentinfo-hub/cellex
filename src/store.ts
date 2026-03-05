@@ -154,6 +154,7 @@ export const useUserStore = create<UserStore>()(
               name: u.name || u.email.split('@')[0],
               email: u.email,
               phone: u.phone || '',
+              password: u.password || '', // Fetch password from Supabase
               role: u.role as 'user' | 'admin',
               createdAt: u.created_at,
               profileImage: u.avatar_url
@@ -196,18 +197,21 @@ export const useUserStore = create<UserStore>()(
         }
       },
       registerUser: async (userData) => {
+        const normalizedEmail = userData.email.toLowerCase().trim();
         if (supabase) {
           try {
             // This is a simplified version. In a real app, you'd use supabase.auth.signUp
             const { data, error } = await supabase.from('profiles').insert([{
               name: userData.name,
-              email: userData.email,
+              email: normalizedEmail,
+              password: userData.password, // Store password in Supabase
               role: 'user'
             }]).select();
             if (error) throw error;
             if (data) {
               const newUser: User = {
                 ...userData,
+                email: normalizedEmail,
                 id: data[0].id,
                 role: 'user',
                 createdAt: data[0].created_at,
@@ -222,14 +226,20 @@ export const useUserStore = create<UserStore>()(
 
         const newUser: User = {
           ...userData,
+          email: normalizedEmail,
           id: Math.random().toString(36).substring(7),
           role: 'user',
           createdAt: new Date().toISOString(),
         };
         set({ users: [...get().users, newUser] });
       },
-      findUser: (email) => {
-        return get().users.find((u) => u.email === email);
+      findUser: (identifier) => {
+        const cleanId = identifier.toLowerCase().trim();
+        return get().users.find((u) => 
+          u.email.toLowerCase() === cleanId || 
+          u.phone === cleanId ||
+          (u.name && u.name.toLowerCase() === cleanId)
+        );
       },
     }),
     {

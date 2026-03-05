@@ -47,9 +47,6 @@ export const AdminLogin = () => {
             </div>
             <h1 className="text-3xl font-display font-bold">Admin Portal</h1>
             <p className="text-[var(--text-secondary)] text-sm mt-2">Secure access for administrators only</p>
-            <div className="mt-4 p-3 bg-ios-orange/10 border border-ios-orange/20 rounded-xl text-[10px] font-bold text-ios-orange uppercase tracking-widest text-center">
-              Demo ID: arvin_hanif | Pass: arvin_hanif
-            </div>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">

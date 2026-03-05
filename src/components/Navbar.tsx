@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShoppingCart, User, Search, Menu, X, ChevronRight, Moon, Sun, Bell, Trash2, CheckCircle } from 'lucide-react';
+import { ShoppingCart, User, Search, Menu, X, ChevronRight, Moon, Sun, Bell, Trash2, CheckCircle, ShoppingBag, Zap } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCartStore, useAuthStore, useThemeStore, useNotificationStore } from '../store';
 import { cn } from '../lib/utils';
@@ -85,6 +85,15 @@ export const Navbar = () => {
             </button>
 
             {/* Notifications */}
+            <div className="hidden md:flex items-center gap-4">
+              <Link to="/shop" className="w-10 h-10 neu-button flex items-center justify-center relative group active:scale-90" title="Shop">
+                <ShoppingBag size={18} className="opacity-60 group-hover:opacity-100" />
+              </Link>
+              <Link to="/shop?filter=categories" className="w-10 h-10 neu-button flex items-center justify-center relative group active:scale-90" title="Categories">
+                <Zap size={18} className="opacity-60 group-hover:opacity-100" />
+              </Link>
+            </div>
+
             <div className="relative">
               <button 
                 onClick={() => setIsNotifOpen(!isNotifOpen)}

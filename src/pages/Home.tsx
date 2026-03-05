@@ -56,8 +56,13 @@ export const Home = () => {
               <Link to="/" className="hover:opacity-100 transition-opacity">Home</Link>
               <Link to="/shop" className="hover:opacity-100 transition-opacity">Shop</Link>
               <Link to="/shop?filter=categories" className="hover:opacity-100 transition-opacity">Categories</Link>
+              <Link to="/cart" className="hover:opacity-100 transition-opacity">Cart</Link>
+              <Link to={profileLink} className="hover:opacity-100 transition-opacity">Account</Link>
             </nav>
             <div className="flex sm:hidden items-center gap-2">
+              <Link to="/cart" className="w-10 h-10 neu-button flex items-center justify-center relative">
+                <ShoppingCart size={18} className="opacity-60" />
+              </Link>
               <Link to="/notifications" className="w-10 h-10 neu-button flex items-center justify-center relative">
                 <Bell size={18} className={cn("opacity-60", unreadCount > 0 && "text-ios-orange opacity-100")} />
                 {unreadCount > 0 && (
@@ -82,6 +87,9 @@ export const Home = () => {
               />
             </form>
             <div className="hidden sm:flex items-center gap-4">
+              <Link to="/cart" className="w-10 h-10 neu-button flex items-center justify-center relative">
+                <ShoppingCart size={18} className="opacity-60" />
+              </Link>
               <Link to="/notifications" className="w-10 h-10 neu-button flex items-center justify-center relative">
                 <Bell size={18} className={cn("opacity-60", unreadCount > 0 && "text-ios-orange opacity-100")} />
                 {unreadCount > 0 && (

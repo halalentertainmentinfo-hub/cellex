@@ -143,12 +143,23 @@ export const AdminDashboard = () => {
   };
   
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+  
+  const today = new Date().toDateString();
+  const dailySales = orders
+    .filter(order => new Date(order.createdAt).toDateString() === today)
+    .reduce((sum, order) => sum + order.total, 0);
+
+  const stockIn = products.reduce((sum, product) => sum + (product.stock || 0), 0);
+  
+  const stockOut = orders.reduce((sum, order) => {
+    return sum + order.items.reduce((itemSum, item) => itemSum + item.quantity, 0);
+  }, 0);
 
   const stats = [
-    { label: 'Total Revenue', value: formatPrice(totalRevenue), icon: TrendingUp, color: 'text-ios-orange', bg: 'bg-ios-orange/10' },
-    { label: 'Total Orders', value: orders.length.toString(), icon: ShoppingBag, color: 'text-ios-orange', bg: 'bg-ios-orange/10' },
-    { label: 'Active Products', value: products.length.toString(), icon: Package, color: 'text-ios-orange', bg: 'bg-ios-orange/10' },
-    { label: 'Total Users', value: users.length.toString(), icon: Users, color: 'text-ios-orange', bg: 'bg-ios-orange/10' },
+    { label: 'Daily Sales', value: formatPrice(dailySales), icon: TrendingUp, color: 'text-ios-orange' },
+    { label: 'Stock In', value: `${stockIn} Units`, icon: ArrowDownCircle, color: 'text-emerald-500' },
+    { label: 'Stock Out', value: `${stockOut} Units`, icon: ArrowUpCircle, color: 'text-red-500' },
+    { label: 'Total Orders', value: orders.length.toString(), icon: ShoppingBag, color: 'text-ios-orange' },
   ];
 
   // Display real orders
@@ -247,16 +258,21 @@ export const AdminDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="text-sm">
-                      {orders.slice(0, 5).map((order) => (
+                      {orders.slice(0, 10).map((order) => (
                         <tr key={order.id} className="border-b border-black/5 hover:bg-white/[0.02] transition-colors">
-                          <td className="px-8 py-6 font-mono text-ios-orange">{order.id.replace('#', 'INV-')}</td>
+                          <td className="px-8 py-6 font-mono text-ios-orange">
+                            {order.invoiceNumber || `#${order.id.slice(0, 8).toUpperCase()}`}
+                          </td>
                           <td className="px-8 py-6">
                             <div className="font-bold">{order.items[0]?.name || 'Premium Gadget'}</div>
                             <div className="text-[10px] opacity-40">{order.userName}</div>
                           </td>
                           <td className="px-8 py-6 font-bold">{formatPrice(order.total)}</td>
                           <td className="px-8 py-6 text-right">
-                            <button className="neu-button p-2">
+                            <button 
+                              onClick={() => generateOrderPDF(order)}
+                              className="neu-button p-2"
+                            >
                               <FileText size={16} className="opacity-60" />
                             </button>
                           </td>
@@ -328,6 +344,7 @@ export const AdminDashboard = () => {
                     <tr className="text-[10px] uppercase tracking-[0.2em] opacity-40 border-b border-black/5">
                       <th className="px-8 py-4">User</th>
                       <th className="px-8 py-4">Contact</th>
+                      <th className="px-8 py-4">Password</th>
                       <th className="px-8 py-4">Joined Date</th>
                       <th className="px-8 py-4">Role</th>
                       <th className="px-8 py-4 text-right">Action</th>
@@ -355,6 +372,9 @@ export const AdminDashboard = () => {
                           <div className="font-medium">{u.email}</div>
                           <div className="text-xs opacity-40">{u.phone || 'No phone'}</div>
                         </td>
+                        <td className="px-8 py-6">
+                          <div className="font-mono text-xs opacity-60">{u.password || 'No password'}</div>
+                        </td>
                         <td className="px-8 py-6 opacity-60">
                           {new Date(u.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </td>
@@ -367,9 +387,22 @@ export const AdminDashboard = () => {
                           </span>
                         </td>
                         <td className="px-8 py-6 text-right">
-                          <button className="neu-button p-2">
-                            <Eye size={16} className="opacity-60" />
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            <button 
+                              onClick={() => {
+                                useAuthStore.getState().setUser(u);
+                                navigate('/account');
+                                toast.success(`Logged in as ${u.name || u.email}`);
+                              }}
+                              className="neu-button p-2 text-ios-orange"
+                              title="Login as User"
+                            >
+                              <LogOut size={16} className="rotate-180" />
+                            </button>
+                            <button className="neu-button p-2">
+                              <Eye size={16} className="opacity-60" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

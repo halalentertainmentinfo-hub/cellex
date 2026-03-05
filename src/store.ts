@@ -250,6 +250,7 @@ export const useUserStore = create<UserStore>()(
 
 export interface Order {
   id: string;
+  invoiceNumber: string;
   userId: string;
   userName: string;
   userPhone?: string;
@@ -419,7 +420,7 @@ export const useOrderRequestStore = create<OrderRequestStore>()(
 interface OrderStore {
   orders: Order[];
   fetchOrders: () => Promise<void>;
-  addOrder: (order: Omit<Order, 'id' | 'createdAt' | 'status'>, address?: string, phone?: string) => Promise<void>;
+  addOrder: (order: Omit<Order, 'id' | 'createdAt' | 'status' | 'invoiceNumber'>, address?: string, phone?: string) => Promise<void>;
   updateOrderStatus: (orderId: string, status: Order['status']) => Promise<void>;
 }
 
@@ -448,6 +449,7 @@ export const useOrderStore = create<OrderStore>()(
           if (ordersData) {
             const formattedOrders: Order[] = ordersData.map((o: any) => ({
               id: o.id,
+              invoiceNumber: o.invoice_number || `#${o.id.slice(0, 8).toUpperCase()}`,
               userId: o.user_id,
               userName: o.profiles?.name || 'User',
               userPhone: o.phone || o.profiles?.phone || 'Not provided',
@@ -470,7 +472,15 @@ export const useOrderStore = create<OrderStore>()(
       addOrder: async (orderData, address = 'Not provided', phone = 'Not provided') => {
         if (supabase) {
           try {
-            // 1. Create Order
+            // 1. Get current order count for sequential invoice number
+            const { count } = await supabase
+              .from('orders')
+              .select('*', { count: 'exact', head: true });
+            
+            const nextNumber = (count || 0) + 1;
+            const invoiceNumber = `#${nextNumber.toString().padStart(4, '0')}`;
+
+            // 2. Create Order
             const { data: order, error: orderError } = await supabase
               .from('orders')
               .insert([{
@@ -478,7 +488,8 @@ export const useOrderStore = create<OrderStore>()(
                 total: orderData.total,
                 status: 'Pending',
                 address,
-                phone
+                phone,
+                invoice_number: invoiceNumber
               }])
               .select()
               .single();
@@ -509,9 +520,11 @@ export const useOrderStore = create<OrderStore>()(
 
         const nextNum = get().orders.length + 1;
         const formattedNum = String(nextNum).padStart(4, '0');
+        const invoiceNumber = `#${formattedNum}`;
         const newOrder: Order = {
           ...orderData,
-          id: `ORD-${formattedNum}#`,
+          id: Math.random().toString(36).substring(7),
+          invoiceNumber,
           status: 'PENDING',
           createdAt: new Date().toISOString(),
         };

@@ -89,7 +89,12 @@ export const AdminDashboard = () => {
     images: [] as string[],
     specs: {},
     stock: 10,
-    description: ''
+    description: '',
+    battery: '',
+    displaySize: '',
+    colors: '',
+    ramOptions: '',
+    storageOptions: ''
   });
 
   const [uploading, setUploading] = React.useState(false);
@@ -127,7 +132,12 @@ export const AdminDashboard = () => {
       toast.error('Please upload a product image');
       return;
     }
-    await addProduct(newProduct);
+    await addProduct({
+      ...newProduct,
+      colors: newProduct.colors.split(',').map(c => c.trim()).filter(c => c),
+      ramOptions: newProduct.ramOptions.split(',').map(r => r.trim()).filter(r => r),
+      storageOptions: newProduct.storageOptions.split(',').map(s => s.trim()).filter(s => s),
+    } as any);
     setIsAddingProduct(false);
     setNewProduct({
       name: '',
@@ -137,7 +147,12 @@ export const AdminDashboard = () => {
       images: [],
       specs: {},
       stock: 10,
-      description: ''
+      description: '',
+      battery: '',
+      displaySize: '',
+      colors: '',
+      ramOptions: '',
+      storageOptions: ''
     });
     toast.success('Product added successfully!');
   };
@@ -449,6 +464,18 @@ export const AdminDashboard = () => {
                         </td>
                         <td className="px-8 py-6">
                           <span className="font-bold">{order.items.reduce((sum: number, item: any) => sum + item.quantity, 0)}</span>
+                          <div className="mt-1 space-y-1">
+                            {order.items.map((item: any, i: number) => (
+                              <div key={i} className="text-[9px] opacity-40 leading-tight">
+                                {item.name} 
+                                {(item.selectedColor || item.selectedRam || item.selectedStorage) && (
+                                  <span className="text-ios-orange ml-1">
+                                    ({[item.selectedColor, item.selectedRam, item.selectedStorage].filter(Boolean).join('/')})
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </td>
                         <td className="px-8 py-6 font-bold">{formatPrice(order.total)}</td>
                         <td className="px-8 py-6">
@@ -802,6 +829,60 @@ export const AdminDashboard = () => {
                       disabled={uploading}
                     />
                   </label>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Battery (mAh)</label>
+                  <input 
+                    type="text" 
+                    value={newProduct.battery}
+                    onChange={(e) => setNewProduct({...newProduct, battery: e.target.value})}
+                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
+                    placeholder="e.g. 5000 mAh"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Display Size</label>
+                  <input 
+                    type="text" 
+                    value={newProduct.displaySize}
+                    onChange={(e) => setNewProduct({...newProduct, displaySize: e.target.value})}
+                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
+                    placeholder="e.g. 6.7 inch"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Colors (Comma separated)</label>
+                <input 
+                  type="text" 
+                  value={newProduct.colors}
+                  onChange={(e) => setNewProduct({...newProduct, colors: e.target.value})}
+                  className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
+                  placeholder="Black, White, Blue"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">RAM Options (Comma separated)</label>
+                  <input 
+                    type="text" 
+                    value={newProduct.ramOptions}
+                    onChange={(e) => setNewProduct({...newProduct, ramOptions: e.target.value})}
+                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
+                    placeholder="8GB, 12GB"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Storage Options (Comma separated)</label>
+                  <input 
+                    type="text" 
+                    value={newProduct.storageOptions}
+                    onChange={(e) => setNewProduct({...newProduct, storageOptions: e.target.value})}
+                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
+                    placeholder="128GB, 256GB"
+                  />
                 </div>
               </div>
               <div className="space-y-2">

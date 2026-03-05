@@ -237,12 +237,29 @@ export const Account = () => {
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <div className="flex -space-x-3">
-                                {order.items.map((item, i) => (
-                                  <div key={i} className="w-10 h-10 rounded-full border-2 border-[var(--card-bg)] overflow-hidden bg-white">
-                                    <img src={item.images[0]} alt="" className="w-full h-full object-cover" />
-                                  </div>
-                                ))}
+                              <div className="flex flex-col gap-4">
+                                <div className="flex -space-x-3">
+                                  {order.items.map((item, i) => (
+                                    <div key={i} className="w-10 h-10 rounded-full border-2 border-[var(--card-bg)] overflow-hidden bg-white group relative">
+                                      <img src={item.images[0]} alt="" className="w-full h-full object-cover" />
+                                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[8px] text-white font-bold">
+                                        x{item.quantity}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="space-y-1">
+                                  {order.items.map((item, i) => (
+                                    <div key={i} className="text-[10px] opacity-60">
+                                      <span className="font-bold">{item.name}</span>
+                                      {(item.selectedColor || item.selectedRam || item.selectedStorage) && (
+                                        <span className="ml-2 opacity-40">
+                                          ({[item.selectedColor, item.selectedRam, item.selectedStorage].filter(Boolean).join(' / ')})
+                                        </span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
                               <div className="flex items-center gap-4">
                                 <button 

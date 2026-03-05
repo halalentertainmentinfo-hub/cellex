@@ -109,6 +109,23 @@ export const Cart = () => {
                       <div>
                         <h3 className="text-xl font-bold mb-1 tracking-tight">{item.name}</h3>
                         <p className="text-xs font-bold uppercase tracking-widest opacity-40">{item.category} • {item.brand}</p>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {item.selectedColor && (
+                            <span className="px-2 py-1 rounded-lg bg-ios-orange/10 text-ios-orange text-[9px] font-bold uppercase tracking-widest border border-ios-orange/20">
+                              {item.selectedColor}
+                            </span>
+                          )}
+                          {item.selectedRam && (
+                            <span className="px-2 py-1 rounded-lg bg-blue-500/10 text-blue-400 text-[9px] font-bold uppercase tracking-widest border border-blue-500/20">
+                              {item.selectedRam}
+                            </span>
+                          )}
+                          {item.selectedStorage && (
+                            <span className="px-2 py-1 rounded-lg bg-purple-500/10 text-purple-400 text-[9px] font-bold uppercase tracking-widest border border-purple-500/20">
+                              {item.selectedStorage}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <span className="text-2xl font-display font-bold text-ios-orange">
                         {formatPrice(item.price)}
@@ -118,14 +135,22 @@ export const Cart = () => {
                     <div className="flex flex-wrap items-center justify-center sm:justify-between gap-6">
                       <div className="flex items-center gap-4 neu-inset p-1 rounded-full">
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.id, item.quantity - 1, {
+                            color: item.selectedColor,
+                            ram: item.selectedRam,
+                            storage: item.selectedStorage
+                          })}
                           className="w-8 h-8 neu-button flex items-center justify-center active:scale-90"
                         >
                           <Minus size={14} />
                         </button>
                         <span className="w-8 text-center font-bold text-sm">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.id, item.quantity + 1, {
+                            color: item.selectedColor,
+                            ram: item.selectedRam,
+                            storage: item.selectedStorage
+                          })}
                           className="w-8 h-8 neu-button flex items-center justify-center active:scale-90"
                         >
                           <Plus size={14} />
@@ -133,7 +158,11 @@ export const Cart = () => {
                       </div>
 
                       <button
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item.id, {
+                          color: item.selectedColor,
+                          ram: item.selectedRam,
+                          storage: item.selectedStorage
+                        })}
                         className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-red-500 hover:text-red-400 transition-colors"
                       >
                         <Trash2 size={14} />

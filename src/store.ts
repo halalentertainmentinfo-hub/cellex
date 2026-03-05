@@ -13,17 +13,26 @@ export interface Product {
   specs: Record<string, string>;
   stock: number;
   description: string;
+  // New fields for detailed specs and variants
+  battery?: string;
+  displaySize?: string;
+  colors?: string[];
+  ramOptions?: string[];
+  storageOptions?: string[];
 }
 
 interface CartItem extends Product {
   quantity: number;
+  selectedColor?: string;
+  selectedRam?: string;
+  selectedStorage?: string;
 }
 
 interface CartStore {
   items: CartItem[];
-  addItem: (product: Product) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addItem: (product: Product, selectedOptions?: { color?: string; ram?: string; storage?: string }) => void;
+  removeItem: (productId: string, selectedOptions?: { color?: string; ram?: string; storage?: string }) => void;
+  updateQuantity: (productId: string, quantity: number, selectedOptions?: { color?: string; ram?: string; storage?: string }) => void;
   clearCart: () => void;
   total: number;
 }
@@ -32,32 +41,61 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
-      addItem: (product) => {
+      addItem: (product, selectedOptions) => {
         const items = get().items;
-        const existingItem = items.find((item) => item.id === product.id);
+        const existingItem = items.find((item) => 
+          item.id === product.id && 
+          item.selectedColor === selectedOptions?.color &&
+          item.selectedRam === selectedOptions?.ram &&
+          item.selectedStorage === selectedOptions?.storage
+        );
+        
         if (existingItem) {
           set({
             items: items.map((item) =>
-              item.id === product.id
+              (item.id === product.id && 
+               item.selectedColor === selectedOptions?.color &&
+               item.selectedRam === selectedOptions?.ram &&
+               item.selectedStorage === selectedOptions?.storage)
                 ? { ...item, quantity: item.quantity + 1 }
                 : item
             ),
           });
         } else {
-          set({ items: [...items, { ...product, quantity: 1 }] });
+          set({ 
+            items: [...items, { 
+              ...product, 
+              quantity: 1,
+              selectedColor: selectedOptions?.color,
+              selectedRam: selectedOptions?.ram,
+              selectedStorage: selectedOptions?.storage
+            }] 
+          });
         }
       },
-      removeItem: (productId) => {
-        set({ items: get().items.filter((item) => item.id !== productId) });
+      removeItem: (productId, selectedOptions) => {
+        set({ 
+          items: get().items.filter((item) => 
+            !(item.id === productId && 
+              item.selectedColor === selectedOptions?.color &&
+              item.selectedRam === selectedOptions?.ram &&
+              item.selectedStorage === selectedOptions?.storage)
+          ) 
+        });
       },
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (productId, quantity, selectedOptions) => {
         if (quantity <= 0) {
-          get().removeItem(productId);
+          get().removeItem(productId, selectedOptions);
           return;
         }
         set({
           items: get().items.map((item) =>
-            item.id === productId ? { ...item, quantity } : item
+            (item.id === productId && 
+             item.selectedColor === selectedOptions?.color &&
+             item.selectedRam === selectedOptions?.ram &&
+             item.selectedStorage === selectedOptions?.storage) 
+              ? { ...item, quantity } 
+              : item
           ),
         });
       },

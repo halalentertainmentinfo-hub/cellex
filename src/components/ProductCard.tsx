@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ShoppingCart, Eye, Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Product, useCartStore } from '../store';
 import { formatPrice, cn } from '../lib/utils';
 import { toast } from 'sonner';
@@ -12,10 +12,19 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem } = useCartStore();
+  const navigate = useNavigate();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // If product has variants, navigate to detail page to let user choose
+    if (product.colors?.length || product.ramOptions?.length || product.storageOptions?.length) {
+      navigate(`/product/${product.id}`);
+      toast.info('Please select your preferred variants');
+      return;
+    }
+
     addItem(product);
     toast.success(`${product.name} added to cart!`, {
       style: {

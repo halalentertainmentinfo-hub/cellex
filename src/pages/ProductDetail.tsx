@@ -13,8 +13,19 @@ export const ProductDetail = () => {
   const { products } = useProductStore();
   const [selectedImage, setSelectedImage] = React.useState(0);
   const [quantity, setQuantity] = React.useState(1);
+  const [selectedColor, setSelectedColor] = React.useState('');
+  const [selectedRam, setSelectedRam] = React.useState('');
+  const [selectedStorage, setSelectedStorage] = React.useState('');
 
   const product = products.find(p => p.id === id);
+
+  React.useEffect(() => {
+    if (product) {
+      if (product.colors?.length) setSelectedColor(product.colors[0]);
+      if (product.ramOptions?.length) setSelectedRam(product.ramOptions[0]);
+      if (product.storageOptions?.length) setSelectedStorage(product.storageOptions[0]);
+    }
+  }, [product]);
 
   if (!product) {
     return (
@@ -26,8 +37,25 @@ export const ProductDetail = () => {
   }
 
   const handleAddToCart = () => {
+    if (product.colors?.length && !selectedColor) {
+      toast.error('Please select a color');
+      return;
+    }
+    if (product.ramOptions?.length && !selectedRam) {
+      toast.error('Please select RAM');
+      return;
+    }
+    if (product.storageOptions?.length && !selectedStorage) {
+      toast.error('Please select storage');
+      return;
+    }
+
     for (let i = 0; i < quantity; i++) {
-      addItem(product);
+      addItem(product, {
+        color: selectedColor,
+        ram: selectedRam,
+        storage: selectedStorage
+      });
     }
     toast.success(`${product.name} added to cart!`, {
       description: `${quantity} item(s) added successfully.`,
@@ -110,13 +138,88 @@ export const ProductDetail = () => {
             </div>
 
             {/* Specs Grid */}
-            <div className="grid grid-cols-2 gap-4 mb-10">
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              {product.battery && (
+                <div className="neu-flat p-4">
+                  <div className="text-[10px] uppercase tracking-widest opacity-30 mb-1">Battery</div>
+                  <div className="text-sm font-bold">{product.battery}</div>
+                </div>
+              )}
+              {product.displaySize && (
+                <div className="neu-flat p-4">
+                  <div className="text-[10px] uppercase tracking-widest opacity-30 mb-1">Display</div>
+                  <div className="text-sm font-bold">{product.displaySize}</div>
+                </div>
+              )}
               {Object.entries(product.specs).map(([key, value]) => (
                 <div key={key} className="neu-flat p-4">
                   <div className="text-[10px] uppercase tracking-widest opacity-30 mb-1">{key}</div>
                   <div className="text-sm font-bold">{value}</div>
                 </div>
               ))}
+            </div>
+
+            {/* Variants Selection */}
+            <div className="space-y-8 mb-10">
+              {product.colors && product.colors.length > 0 && (
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">Select Color</label>
+                  <div className="flex flex-wrap gap-3">
+                    {product.colors.map(color => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={cn(
+                          "px-4 py-2 rounded-xl text-xs font-bold transition-all",
+                          selectedColor === color ? "neu-inset text-ios-orange" : "neu-flat opacity-60"
+                        )}
+                      >
+                        {color}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {product.ramOptions && product.ramOptions.length > 0 && (
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">Select RAM</label>
+                  <div className="flex flex-wrap gap-3">
+                    {product.ramOptions.map(ram => (
+                      <button
+                        key={ram}
+                        onClick={() => setSelectedRam(ram)}
+                        className={cn(
+                          "px-4 py-2 rounded-xl text-xs font-bold transition-all",
+                          selectedRam === ram ? "neu-inset text-ios-orange" : "neu-flat opacity-60"
+                        )}
+                      >
+                        {ram}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {product.storageOptions && product.storageOptions.length > 0 && (
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">Select Storage</label>
+                  <div className="flex flex-wrap gap-3">
+                    {product.storageOptions.map(storage => (
+                      <button
+                        key={storage}
+                        onClick={() => setSelectedStorage(storage)}
+                        className={cn(
+                          "px-4 py-2 rounded-xl text-xs font-bold transition-all",
+                          selectedStorage === storage ? "neu-inset text-ios-orange" : "neu-flat opacity-60"
+                        )}
+                      >
+                        {storage}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Actions */}

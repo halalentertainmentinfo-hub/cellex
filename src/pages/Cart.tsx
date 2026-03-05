@@ -95,11 +95,11 @@ export const Cart = () => {
                   exit={{ opacity: 0, x: 20 }}
                   className="ios-card p-6 flex flex-col sm:flex-row items-center gap-8 group"
                 >
-                  <div className="w-32 h-32 neu-inset overflow-hidden flex-shrink-0 p-2 rounded-full">
+                  <div className="w-32 h-32 neu-inset overflow-hidden flex-shrink-0 p-2 rounded-2xl">
                     <img
                       src={item.images[0]}
                       alt={item.name}
-                      className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-1000"
+                      className="w-full h-full object-cover rounded-xl group-hover:scale-110 transition-transform duration-1000"
                       referrerPolicy="no-referrer"
                     />
                   </div>

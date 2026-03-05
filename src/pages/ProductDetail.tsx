@@ -86,12 +86,12 @@ export const ProductDetail = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="aspect-square neu-flat p-4 rounded-full"
+              className="aspect-square neu-flat p-4 rounded-3xl"
             >
               <img
                 src={product.images[selectedImage]}
                 alt={product.name}
-                className="w-full h-full object-cover rounded-full"
+                className="w-full h-full object-cover rounded-2xl"
                 referrerPolicy="no-referrer"
               />
             </motion.div>
@@ -102,11 +102,11 @@ export const ProductDetail = () => {
                   key={i}
                   onClick={() => setSelectedImage(i)}
                   className={cn(
-                    "aspect-square neu-button p-1 transition-all",
+                    "aspect-square neu-button p-1 transition-all rounded-xl",
                     selectedImage === i ? "ring-2 ring-ios-orange" : "opacity-50 hover:opacity-100"
                   )}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover rounded-full" referrerPolicy="no-referrer" />
+                  <img src={img} alt="" className="w-full h-full object-cover rounded-lg" referrerPolicy="no-referrer" />
                 </button>
               ))}
             </div>

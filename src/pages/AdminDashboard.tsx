@@ -94,7 +94,8 @@ export const AdminDashboard = () => {
     displaySize: '',
     colors: '',
     ramOptions: '',
-    storageOptions: ''
+    storageOptions: '',
+    isFeatured: false
   });
 
   const [uploading, setUploading] = React.useState(false);
@@ -137,6 +138,7 @@ export const AdminDashboard = () => {
       colors: newProduct.colors.split(',').map(c => c.trim()).filter(c => c),
       ramOptions: newProduct.ramOptions.split(',').map(r => r.trim()).filter(r => r),
       storageOptions: newProduct.storageOptions.split(',').map(s => s.trim()).filter(s => s),
+      isFeatured: newProduct.isFeatured
     } as any);
     setIsAddingProduct(false);
     setNewProduct({
@@ -152,7 +154,8 @@ export const AdminDashboard = () => {
       displaySize: '',
       colors: '',
       ramOptions: '',
-      storageOptions: ''
+      storageOptions: '',
+      isFeatured: false
     });
     toast.success('Product added successfully!');
   };
@@ -884,6 +887,17 @@ export const AdminDashboard = () => {
                     placeholder="128GB, 256GB"
                   />
                 </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 neu-inset rounded-2xl">
+                <input 
+                  type="checkbox" 
+                  id="isFeatured"
+                  checked={newProduct.isFeatured}
+                  onChange={(e) => setNewProduct({...newProduct, isFeatured: e.target.checked})}
+                  className="w-5 h-5 rounded-lg accent-ios-orange"
+                />
+                <label htmlFor="isFeatured" className="text-sm font-bold opacity-60 cursor-pointer">Mark as Featured Product</label>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Description</label>

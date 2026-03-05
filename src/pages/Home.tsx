@@ -15,8 +15,11 @@ export const Home = () => {
   
   const unreadCount = notifications.filter(n => !n.read).length;
   
-  const heroProduct = products[0];
-  const featuredProducts = products.slice(0, 4);
+  const heroProduct = products.find(p => p.isFeatured) || products[0];
+  const featuredProducts = products.filter(p => p.isFeatured).slice(0, 4);
+  
+  // Fallback if no featured products
+  const displayProducts = featuredProducts.length > 0 ? featuredProducts : products.slice(0, 4);
 
   const profileLink = user ? (user.role === 'admin' ? '/admin' : '/account') : '/login';
 
@@ -56,8 +59,6 @@ export const Home = () => {
               <Link to="/" className="hover:opacity-100 transition-opacity">Home</Link>
               <Link to="/shop" className="hover:opacity-100 transition-opacity">Shop</Link>
               <Link to="/shop?filter=categories" className="hover:opacity-100 transition-opacity">Categories</Link>
-              <Link to="/cart" className="hover:opacity-100 transition-opacity">Cart</Link>
-              <Link to={profileLink} className="hover:opacity-100 transition-opacity">Account</Link>
             </nav>
             <div className="flex sm:hidden items-center gap-2">
               <Link to="/cart" className="w-10 h-10 neu-button flex items-center justify-center relative">
@@ -183,7 +184,7 @@ export const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
+            {displayProducts.map((product) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -193,11 +194,11 @@ export const Home = () => {
               >
                 <Link to={`/product/${product.id}`} className="block">
                   <div className="neu-flat p-6 h-full flex flex-col">
-                    <div className="relative aspect-square rounded-full overflow-hidden neu-inset mb-6 p-4">
+                    <div className="relative aspect-square rounded-2xl overflow-hidden neu-inset mb-6 p-4">
                       <img
                         src={product.images[0]}
                         alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-full"
+                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-xl"
                         referrerPolicy="no-referrer"
                       />
                       <div className="absolute top-4 left-4 px-3 py-1 rounded-full ios-glass text-[9px] font-bold uppercase tracking-widest opacity-80">

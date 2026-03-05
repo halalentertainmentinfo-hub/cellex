@@ -240,7 +240,7 @@ export const Account = () => {
                               <div className="flex flex-col gap-4">
                                 <div className="flex -space-x-3">
                                   {order.items.map((item, i) => (
-                                    <div key={i} className="w-10 h-10 rounded-full border-2 border-[var(--card-bg)] overflow-hidden bg-white group relative">
+                                    <div key={i} className="w-10 h-10 rounded-xl border-2 border-[var(--card-bg)] overflow-hidden bg-white group relative">
                                       <img src={item.images[0]} alt="" className="w-full h-full object-cover" />
                                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[8px] text-white font-bold">
                                         x{item.quantity}

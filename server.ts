@@ -30,6 +30,36 @@ async function startServer() {
       appType: "spa",
     });
     app.use(vite.middlewares);
+
+    // Fallback for development to ensure SPA routing works on refresh
+    app.use("*", async (req, res, next) => {
+      const url = req.originalUrl;
+      try {
+        // If it's an API route, don't serve index.html
+        if (url.startsWith('/api')) {
+          return next();
+        }
+        
+        // Let Vite handle the HTML serving
+        const html = await vite.transformIndexHtml(url, `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <title>CELLEX</title>
+            </head>
+            <body>
+              <div id="root"></div>
+              <script type="module" src="/src/main.tsx"></script>
+            </body>
+          </html>
+        `);
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
+      } catch (e) {
+        next(e);
+      }
+    });
   }
 
   app.listen(PORT, "0.0.0.0", () => {

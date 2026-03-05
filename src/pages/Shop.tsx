@@ -10,7 +10,6 @@ import { useProductStore } from '../store';
 export const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = React.useState(searchParams.get('q') || '');
-  const [selectedCategory, setSelectedCategory] = React.useState(searchParams.get('category') || 'All');
   
   React.useEffect(() => {
     const q = searchParams.get('q');
@@ -20,9 +19,6 @@ export const Shop = () => {
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid');
   const { products } = useProductStore();
 
-  const categories = ['All', 'Smartphones', 'Laptops', 'Audio', 'Wearables', 'Tablets'];
-  const showCategoriesOnly = searchParams.get('filter') === 'categories';
-
   const filteredProducts = products.filter(product => {
     const searchWords = searchQuery.toLowerCase().trim().split(/\s+/).filter(word => word.length > 0);
     const matchesSearch = searchWords.length === 0 || searchWords.some(word => 
@@ -30,9 +26,8 @@ export const Shop = () => {
       product.brand.toLowerCase().includes(word) ||
       product.category.toLowerCase().includes(word)
     );
-    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
     const matchesPrice = product.price <= priceRange;
-    return matchesSearch && matchesCategory && matchesPrice;
+    return matchesSearch && matchesPrice;
   });
 
   const [isFilterOpen, setIsFilterOpen] = React.useState(false);
@@ -44,10 +39,10 @@ export const Shop = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
           <div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold mb-4 tracking-tight">
-              {showCategoriesOnly ? 'Categories' : 'Explore'}
+              Explore
             </h1>
             <p className="text-[var(--text-secondary)] font-medium">
-              {showCategoriesOnly ? 'Select a category to browse products.' : 'Browse our collection of premium devices.'}
+              Browse our collection of premium devices.
             </p>
           </div>
           
@@ -75,65 +70,9 @@ export const Shop = () => {
           </div>
         </div>
 
-        {showCategoriesOnly && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-16">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => {
-                  setSelectedCategory(cat);
-                  const newParams = new URLSearchParams(searchParams);
-                  newParams.delete('filter');
-                  newParams.set('category', cat);
-                  setSearchParams(newParams);
-                }}
-                className={cn(
-                  "neu-flat p-6 flex flex-col items-center justify-center gap-4 transition-all duration-300 group",
-                  selectedCategory === cat ? "ring-2 ring-ios-orange" : "hover:scale-105"
-                )}
-              >
-                <div className={cn(
-                  "w-12 h-12 rounded-full flex items-center justify-center transition-colors",
-                  selectedCategory === cat ? "bg-ios-orange text-white" : "bg-white/5 group-hover:bg-ios-orange/10"
-                )}>
-                  <Zap size={20} />
-                </div>
-                <span className="text-sm font-bold uppercase tracking-widest">{cat}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
         <div className="grid lg:grid-cols-[280px_1fr] gap-16">
           {/* Sidebar Filters */}
           <aside className="hidden lg:block space-y-12">
-            {/* Categories */}
-            <div>
-              <h3 className="text-xs font-bold mb-8 uppercase tracking-[0.2em] opacity-40">Categories</h3>
-              <div className="space-y-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={cn(
-                      "w-full text-left px-5 py-4 rounded-2xl transition-all duration-300 flex items-center justify-between group font-semibold",
-                      selectedCategory === cat 
-                        ? "bg-ios-orange text-white shadow-lg shadow-ios-orange/20" 
-                        : "hover:bg-white/5 opacity-60 hover:opacity-100"
-                    )}
-                  >
-                    {cat}
-                    <span className={cn(
-                      "text-[10px] px-2 py-0.5 rounded-full font-bold",
-                      selectedCategory === cat ? "bg-white/20" : "bg-white/10"
-                    )}>
-                      {cat === 'All' ? products.length : products.filter(p => p.category === cat).length}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Price Range */}
             <div>
               <h3 className="text-xs font-bold mb-8 uppercase tracking-[0.2em] opacity-40">Price Range</h3>
@@ -241,36 +180,6 @@ export const Shop = () => {
                 </div>
 
                 <div className="space-y-12">
-                  {/* Categories */}
-                  <div>
-                    <h3 className="text-xs font-bold mb-8 uppercase tracking-[0.2em] opacity-40">Categories</h3>
-                    <div className="space-y-2">
-                      {categories.map((cat) => (
-                        <button
-                          key={cat}
-                          onClick={() => {
-                            setSelectedCategory(cat);
-                            setIsFilterOpen(false);
-                          }}
-                          className={cn(
-                            "w-full text-left px-5 py-4 rounded-2xl transition-all duration-300 flex items-center justify-between group font-semibold",
-                            selectedCategory === cat 
-                              ? "bg-ios-orange text-white shadow-lg shadow-ios-orange/20" 
-                              : "hover:bg-white/5 opacity-60 hover:opacity-100"
-                          )}
-                        >
-                          {cat}
-                          <span className={cn(
-                            "text-[10px] px-2 py-0.5 rounded-full font-bold",
-                            selectedCategory === cat ? "bg-white/20" : "bg-white/10"
-                          )}>
-                            {cat === 'All' ? products.length : products.filter(p => p.category === cat).length}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Price Range */}
                   <div>
                     <h3 className="text-xs font-bold mb-8 uppercase tracking-[0.2em] opacity-40">Price Range</h3>

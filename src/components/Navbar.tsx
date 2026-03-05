@@ -30,7 +30,6 @@ export const Navbar = () => {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Shop', path: '/shop' },
-    { name: 'Categories', path: '/shop?filter=categories' },
   ];
 
   if (location.pathname === '/') return null;
@@ -88,9 +87,6 @@ export const Navbar = () => {
             <div className="hidden md:flex items-center gap-4">
               <Link to="/shop" className="w-10 h-10 neu-button flex items-center justify-center relative group active:scale-90" title="Shop">
                 <ShoppingBag size={18} className="opacity-60 group-hover:opacity-100" />
-              </Link>
-              <Link to="/shop?filter=categories" className="w-10 h-10 neu-button flex items-center justify-center relative group active:scale-90" title="Categories">
-                <Zap size={18} className="opacity-60 group-hover:opacity-100" />
               </Link>
             </div>
 

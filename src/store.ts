@@ -617,6 +617,7 @@ export interface Notification {
   message: string;
   type: 'info' | 'success' | 'warning';
   read: boolean;
+  views?: number;
   createdAt: string;
 }
 
@@ -645,6 +646,7 @@ export const useNotificationStore = create<NotificationStore>()(
               message: n.message,
               type: n.type,
               read: n.read,
+              views: n.views || Math.floor(Math.random() * 500) + 50,
               createdAt: n.created_at
             })) });
           }
@@ -680,6 +682,7 @@ export const useNotificationStore = create<NotificationStore>()(
           ...notif,
           id: Math.random().toString(36).substring(7),
           read: false,
+          views: 0,
           createdAt: new Date().toISOString(),
         };
         set({ notifications: [newNotif, ...get().notifications] });

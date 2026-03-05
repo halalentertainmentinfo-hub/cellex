@@ -730,7 +730,13 @@ export const AdminDashboard = () => {
                       <div key={n.id} className="p-4 border-b border-black/5 last:border-0">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-bold">{n.title}</span>
-                          <span className="text-[9px] opacity-40">{new Date(n.createdAt).toLocaleDateString()}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 text-[9px] opacity-40">
+                              <Eye size={10} />
+                              {n.views || 0}
+                            </div>
+                            <span className="text-[9px] opacity-40">{new Date(n.createdAt).toLocaleDateString()}</span>
+                          </div>
                         </div>
                         <p className="text-[10px] opacity-60 line-clamp-1">{n.message}</p>
                       </div>
@@ -784,17 +790,14 @@ export const AdminDashboard = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Category</label>
-                  <select 
+                  <input 
+                    type="text" 
+                    required
                     value={newProduct.category}
                     onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
-                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all appearance-none"
-                  >
-                    <option value="Smartphones">Smartphones</option>
-                    <option value="Laptops">Laptops</option>
-                    <option value="Audio">Audio</option>
-                    <option value="Wearables">Wearables</option>
-                    <option value="Tablets">Tablets</option>
-                  </select>
+                    placeholder="e.g. Smartphones"
+                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Brand</label>

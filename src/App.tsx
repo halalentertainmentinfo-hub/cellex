@@ -31,8 +31,6 @@ export default function App() {
   const { fetchRequests } = useOrderRequestStore();
   const { fetchNotifications } = useNotificationStore();
 
-  const [isInitializing, setIsInitializing] = React.useState(true);
-
   React.useEffect(() => {
     const initData = async () => {
       try {
@@ -43,8 +41,8 @@ export default function App() {
           fetchRequests(),
           fetchNotifications()
         ]);
-      } finally {
-        setIsInitializing(false);
+      } catch (error) {
+        console.error('Initialization error:', error);
       }
     };
     initData();
@@ -58,17 +56,6 @@ export default function App() {
       root.classList.remove('dark');
     }
   }, [theme]);
-
-  if (isInitializing) {
-    return (
-      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-ios-orange border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm font-bold tracking-widest uppercase opacity-40 animate-pulse">Initializing Cellex...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <Router>

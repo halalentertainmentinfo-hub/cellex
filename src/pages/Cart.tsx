@@ -173,6 +173,21 @@ export const Cart = () => {
                 </motion.div>
               ))}
             </AnimatePresence>
+
+            {/* Promo Code - Moved here */}
+            <div className="ios-card p-6 mt-12 max-w-md">
+              <h3 className="text-xs font-bold mb-4 uppercase tracking-widest opacity-40">Promo Code</h3>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Enter code"
+                  className="flex-1 bg-white/5 border border-white/10 rounded-full px-5 py-2 text-sm outline-none focus:border-ios-orange/50 transition-all"
+                />
+                <button className="px-5 py-2 ios-glass rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all">
+                  Apply
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Summary */}
@@ -274,21 +289,6 @@ export const Cart = () => {
                   <Truck size={16} className="text-ios-orange" />
                   Free Express Shipping
                 </div>
-              </div>
-            </div>
-
-            {/* Promo Code */}
-            <div className="ios-card p-6 mt-8">
-              <h3 className="text-xs font-bold mb-4 uppercase tracking-widest opacity-40">Promo Code</h3>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Enter code"
-                  className="flex-1 bg-white/5 border border-white/10 rounded-full px-5 py-2 text-sm outline-none focus:border-ios-orange/50 transition-all"
-                />
-                <button className="px-5 py-2 ios-glass rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all">
-                  Apply
-                </button>
               </div>
             </div>
           </aside>

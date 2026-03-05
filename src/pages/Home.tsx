@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { LOGO_URL } from '../constants';
 
 export const Home = () => {
+  const [isExpanded, setIsExpanded] = React.useState(false);
   const { products } = useProductStore();
   const { addItem } = useCartStore();
   const { notifications } = useNotificationStore();
@@ -16,10 +17,13 @@ export const Home = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
   
   const heroProduct = products.find(p => p.isFeatured) || products[0];
-  const featuredProducts = products.filter(p => p.isFeatured).slice(0, 4);
+  const allFeaturedProducts = products.filter(p => p.isFeatured);
   
-  // Fallback if no featured products
-  const displayProducts = featuredProducts.length > 0 ? featuredProducts : products.slice(0, 4);
+  // If no featured products, use all products as fallback
+  const baseProducts = allFeaturedProducts.length > 0 ? allFeaturedProducts : products;
+  
+  // Display 8 products initially (2 rows of 4), or all if expanded
+  const displayProducts = isExpanded ? baseProducts : baseProducts.slice(0, 8);
 
   const profileLink = user ? (user.role === 'admin' ? '/admin' : '/account') : '/login';
 
@@ -58,7 +62,6 @@ export const Home = () => {
             <nav className="hidden md:flex items-center gap-8 text-sm font-medium opacity-60">
               <Link to="/" className="hover:opacity-100 transition-opacity">Home</Link>
               <Link to="/shop" className="hover:opacity-100 transition-opacity">Shop</Link>
-              <Link to="/shop?filter=categories" className="hover:opacity-100 transition-opacity">Categories</Link>
             </nav>
             <div className="flex sm:hidden items-center gap-2">
               <Link to="/cart" className="w-10 h-10 neu-button flex items-center justify-center relative">
@@ -238,54 +241,27 @@ export const Home = () => {
               </motion.div>
             ))}
           </div>
-        </div>
 
-        {/* Category Bento Section */}
-        <div className="grid md:grid-cols-3 gap-8 mt-12">
-          <div className="neu-flat p-8 flex flex-col justify-between group cursor-pointer overflow-hidden relative">
-            <div className="z-10">
-              <h3 className="text-2xl font-display font-bold mb-2">Smartphones</h3>
-              <p className="text-sm opacity-60">The latest flagships.</p>
+          {baseProducts.length > 8 && (
+            <div className="flex justify-center mt-12">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="neu-button px-10 py-4 text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-3 hover:text-ios-orange transition-all group"
+              >
+                {isExpanded ? (
+                  <>
+                    Show Less <ChevronLeft size={16} className="rotate-90 group-hover:-translate-y-1 transition-transform" />
+                  </>
+                ) : (
+                  <>
+                    See More <ChevronRight size={16} className="rotate-90 group-hover:translate-y-1 transition-transform" />
+                  </>
+                )}
+              </motion.button>
             </div>
-            <div className="mt-8 z-10">
-              <Link to="/shop?category=Smartphones" className="w-10 h-10 neu-button flex items-center justify-center group-hover:bg-ios-orange group-hover:text-white transition-all">
-                <ArrowRight size={18} />
-              </Link>
-            </div>
-            <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10 group-hover:opacity-20 transition-opacity rotate-12">
-              <Zap size={128} />
-            </div>
-          </div>
-
-          <div className="neu-flat p-8 flex flex-col justify-between group cursor-pointer overflow-hidden relative">
-            <div className="z-10">
-              <h3 className="text-2xl font-display font-bold mb-2">Laptops</h3>
-              <p className="text-sm opacity-60">Power for creators.</p>
-            </div>
-            <div className="mt-8 z-10">
-              <Link to="/shop?category=Laptops" className="w-10 h-10 neu-button flex items-center justify-center group-hover:bg-ios-orange group-hover:text-white transition-all">
-                <ArrowRight size={18} />
-              </Link>
-            </div>
-            <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10 group-hover:opacity-20 transition-opacity -rotate-12">
-              <Cloud size={128} />
-            </div>
-          </div>
-
-          <div className="neu-flat p-8 flex flex-col justify-between group cursor-pointer overflow-hidden relative">
-            <div className="z-10">
-              <h3 className="text-2xl font-display font-bold mb-2">Audio</h3>
-              <p className="text-sm opacity-60">Immersive sound.</p>
-            </div>
-            <div className="mt-8 z-10">
-              <Link to="/shop?category=Audio" className="w-10 h-10 neu-button flex items-center justify-center group-hover:bg-ios-orange group-hover:text-white transition-all">
-                <ArrowRight size={18} />
-              </Link>
-            </div>
-            <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Zap size={128} className="text-ios-gold" />
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

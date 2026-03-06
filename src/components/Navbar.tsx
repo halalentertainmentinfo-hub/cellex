@@ -15,7 +15,7 @@ export const Navbar = () => {
   const { items } = useCartStore();
   const { user } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
-  const { notifications, markAsRead, clearAll } = useNotificationStore();
+  const { notifications, markAsRead, markAllAsRead, clearAll } = useNotificationStore();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -122,6 +122,12 @@ export const Navbar = () => {
                           className="text-[10px] font-bold text-ios-orange uppercase tracking-widest hover:underline"
                         >
                           View All
+                        </button>
+                        <button 
+                          onClick={markAllAsRead}
+                          className="text-[10px] font-bold text-ios-orange uppercase tracking-widest hover:underline"
+                        >
+                          Read All
                         </button>
                         <button 
                           onClick={clearAll}

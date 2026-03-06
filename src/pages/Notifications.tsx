@@ -6,7 +6,7 @@ import { cn } from '../lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 
 export const Notifications = () => {
-  const { notifications, markAsRead, clearAll, deleteNotification, incrementViewCount } = useNotificationStore();
+  const { notifications, markAsRead, markAllAsRead, clearAll, deleteNotification, incrementViewCount } = useNotificationStore();
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -83,15 +83,28 @@ export const Notifications = () => {
           </p>
         </div>
 
-        <motion.button
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          onClick={clearAll}
-          className="neu-button px-6 py-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:text-ios-orange transition-colors"
-        >
-          <Trash2 size={16} />
-          Clear All
-        </motion.button>
+        <div className="flex flex-wrap items-center gap-4">
+          {unreadCount > 0 && (
+            <motion.button
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              onClick={markAllAsRead}
+              className="neu-button px-6 py-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-ios-orange transition-colors"
+            >
+              <CheckCircle size={16} />
+              Mark all as read
+            </motion.button>
+          )}
+          <motion.button
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            onClick={clearAll}
+            className="neu-button px-6 py-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:text-ios-orange transition-colors"
+          >
+            <Trash2 size={16} />
+            Clear All
+          </motion.button>
+        </div>
       </div>
 
       <div className="space-y-12">

@@ -104,7 +104,8 @@ export const AdminDashboard = () => {
     colors: '',
     ramOptions: '',
     storageOptions: '',
-    isFeatured: false
+    isFeatured: false,
+    rating: 5.0
   });
 
   const [uploading, setUploading] = React.useState(false);
@@ -152,7 +153,8 @@ export const AdminDashboard = () => {
       colors: Array.isArray(product.colors) ? product.colors.join(', ') : '',
       ramOptions: Array.isArray(product.ramOptions) ? product.ramOptions.join(', ') : '',
       storageOptions: Array.isArray(product.storageOptions) ? product.storageOptions.join(', ') : '',
-      isFeatured: product.isFeatured || false
+      isFeatured: product.isFeatured || false,
+      rating: product.rating || 5.0
     });
     setIsAddingProduct(true);
   };
@@ -176,7 +178,8 @@ export const AdminDashboard = () => {
       colors: typeof newProduct.colors === 'string' ? newProduct.colors.split(',').map(c => c.trim()).filter(c => c) : newProduct.colors,
       ramOptions: typeof newProduct.ramOptions === 'string' ? newProduct.ramOptions.split(',').map(r => r.trim()).filter(r => r) : newProduct.ramOptions,
       storageOptions: typeof newProduct.storageOptions === 'string' ? newProduct.storageOptions.split(',').map(s => s.trim()).filter(s => s) : newProduct.storageOptions,
-      isFeatured: newProduct.isFeatured
+      isFeatured: newProduct.isFeatured,
+      rating: newProduct.rating
     };
 
     if (editingProduct) {
@@ -203,7 +206,8 @@ export const AdminDashboard = () => {
       colors: '',
       ramOptions: '',
       storageOptions: '',
-      isFeatured: false
+      isFeatured: false,
+      rating: 5.0
     });
   };
   
@@ -996,6 +1000,23 @@ export const AdminDashboard = () => {
                   onClick={() => {
                     setIsAddingProduct(false);
                     setEditingProduct(null);
+                    setNewProduct({
+                      name: '',
+                      price: 0,
+                      category: 'Smartphones',
+                      brand: '',
+                      images: [],
+                      specs: {},
+                      stock: 10,
+                      description: '',
+                      battery: '',
+                      displaySize: '',
+                      colors: '',
+                      ramOptions: '',
+                      storageOptions: '',
+                      isFeatured: false,
+                      rating: 5.0
+                    });
                   }}
                   className="w-12 h-12 neu-button flex items-center justify-center text-red-500"
                 >
@@ -1053,6 +1074,20 @@ export const AdminDashboard = () => {
                       placeholder="e.g. 10"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Product Rating (e.g. 4.5)</label>
+                  <input 
+                    type="number" 
+                    step="0.1"
+                    min="0"
+                    max="5"
+                    value={newProduct.rating}
+                    onChange={(e) => setNewProduct({...newProduct, rating: Number(e.target.value)})}
+                    className="w-full neu-inset px-6 py-4 text-sm outline-none focus:border-ios-orange/50 transition-all rounded-2xl"
+                    placeholder="e.g. 4.5"
+                  />
                 </div>
 
                 <div className="space-y-3">
@@ -1169,6 +1204,23 @@ export const AdminDashboard = () => {
                     onClick={() => {
                       setIsAddingProduct(false);
                       setEditingProduct(null);
+                      setNewProduct({
+                        name: '',
+                        price: 0,
+                        category: 'Smartphones',
+                        brand: '',
+                        images: [],
+                        specs: {},
+                        stock: 10,
+                        description: '',
+                        battery: '',
+                        displaySize: '',
+                        colors: '',
+                        ramOptions: '',
+                        storageOptions: '',
+                        isFeatured: false,
+                        rating: 5.0
+                      });
                     }}
                     className="flex-1 neu-button py-6 text-sm font-bold uppercase tracking-widest text-red-500 rounded-2xl"
                   >

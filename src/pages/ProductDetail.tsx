@@ -133,7 +133,7 @@ export const ProductDetail = () => {
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center gap-1">
                   <Star size={14} className="text-yellow-400 fill-yellow-400" />
-                  <span className="text-sm font-bold">4.9 (128 reviews)</span>
+                  <span className="text-sm font-bold">{product.rating ? product.rating.toFixed(1) : '5.0'} (128 reviews)</span>
                 </div>
               </div>
               

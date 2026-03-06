@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { User, Package, Settings, LogOut, ChevronRight, Mail, Shield, Camera, Phone, CreditCard, Bell, Download } from 'lucide-react';
-import { useAuthStore, useOrderStore } from '../store';
+import { useAuthStore, useOrderStore, useUserStore } from '../store';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { formatPrice, cn } from '../lib/utils';
@@ -9,6 +9,7 @@ import { generateOrderPDF } from '../lib/pdf';
 
 export const Account = () => {
   const { user, logout, updateUser } = useAuthStore();
+  const { updateUserProfile } = useUserStore();
   const { orders } = useOrderStore();
   const navigate = useNavigate();
 
@@ -25,21 +26,28 @@ export const Account = () => {
     navigate('/');
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        updateUser({ profileImage: reader.result as string });
+      reader.onloadend = async () => {
+        const profileImage = reader.result as string;
+        updateUser({ profileImage });
+        if (user) {
+          await updateUserProfile(user.id, { profileImage });
+        }
         toast.success('Profile picture updated!');
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleUpdateProfile = (e: React.FormEvent) => {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     updateUser({ name: editName, phone: editPhone });
+    if (user) {
+      await updateUserProfile(user.id, { name: editName, phone: editPhone });
+    }
     toast.success('Profile updated successfully!');
   };
 

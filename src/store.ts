@@ -20,6 +20,7 @@ export interface Product {
   ramOptions?: string[];
   storageOptions?: string[];
   isFeatured?: boolean;
+  rating?: number;
 }
 
 interface CartItem extends Product {
@@ -173,6 +174,7 @@ interface UserStore {
   isLoading: boolean;
   fetchUsers: () => Promise<void>;
   registerUser: (user: Omit<User, 'id' | 'createdAt' | 'role'>) => Promise<void>;
+  updateUserProfile: (userId: string, data: Partial<User>) => Promise<void>;
   findUser: (email: string) => User | undefined;
 }
 
@@ -283,6 +285,31 @@ export const useUserStore = create<UserStore>()(
           createdAt: new Date().toISOString(),
         };
         set({ users: [...get().users, newUser] });
+      },
+      updateUserProfile: async (userId, data) => {
+        if (supabase) {
+          try {
+            const updateData: any = {};
+            if (data.name !== undefined) updateData.name = data.name;
+            if (data.phone !== undefined) updateData.phone = data.phone;
+            if (data.profileImage !== undefined) updateData.avatar_url = data.profileImage;
+
+            if (Object.keys(updateData).length > 0) {
+              const { error } = await supabase
+                .from('profiles')
+                .update(updateData)
+                .eq('id', userId);
+              
+              if (error) throw error;
+            }
+          } catch (error) {
+            console.error('Error updating user profile in Supabase:', error);
+          }
+        }
+
+        set({
+          users: get().users.map(u => u.id === userId ? { ...u, ...data } : u)
+        });
       },
       findUser: (identifier) => {
         const cleanId = identifier.toLowerCase().trim();
@@ -721,6 +748,7 @@ export interface Notification {
   type: 'info' | 'success' | 'warning';
   read: boolean;
   views?: number;
+  viewedBy?: string[];
   createdAt: string;
 }
 
@@ -730,7 +758,7 @@ interface NotificationStore {
   addNotification: (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => Promise<void>;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
-  incrementViewCount: (id: string) => void;
+  incrementViewCount: (id: string, userId?: string) => void;
   deleteNotification: (id: string) => void;
   clearAll: () => void;
 }
@@ -804,11 +832,17 @@ export const useNotificationStore = create<NotificationStore>()(
           notifications: get().notifications.map((n) => ({ ...n, read: true })),
         });
       },
-      incrementViewCount: (id) => {
+      incrementViewCount: (id, userId) => {
         set({
-          notifications: get().notifications.map((n) =>
-            n.id === id ? { ...n, views: (n.views || 0) + 1 } : n
-          ),
+          notifications: get().notifications.map((n) => {
+            if (n.id === id) {
+              const viewedBy = n.viewedBy || [];
+              if (userId && !viewedBy.includes(userId)) {
+                return { ...n, views: (n.views || 0) + 1, viewedBy: [...viewedBy, userId] };
+              }
+            }
+            return n;
+          }),
         });
       },
       deleteNotification: (id) => {

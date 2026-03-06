@@ -1,12 +1,13 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, CheckCircle, Trash2, Clock, Info, AlertTriangle, ChevronRight } from 'lucide-react';
-import { useNotificationStore } from '../store';
+import { useNotificationStore, useAuthStore } from '../store';
 import { cn } from '../lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 
 export const Notifications = () => {
   const { notifications, markAsRead, markAllAsRead, clearAll, deleteNotification, incrementViewCount } = useNotificationStore();
+  const { user } = useAuthStore();
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -131,7 +132,7 @@ export const Notifications = () => {
                       )}
                       onClick={() => {
                         markAsRead(n.id);
-                        incrementViewCount(n.id);
+                        incrementViewCount(n.id, user?.id);
                       }}
                     >
                       <div className="flex flex-col sm:flex-row gap-6">

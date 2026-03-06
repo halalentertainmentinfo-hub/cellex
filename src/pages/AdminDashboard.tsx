@@ -502,11 +502,19 @@ export const AdminDashboard = () => {
                         <td className="px-8 py-6">
                           <div className="flex items-center gap-4">
                             <div className="w-10 h-10 neu-button flex items-center justify-center overflow-hidden">
-                              <img 
-                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${u.email}`} 
-                                alt="" 
-                                className="w-full h-full object-cover"
-                              />
+                              {u.profileImage ? (
+                                <img 
+                                  src={u.profileImage} 
+                                  alt="" 
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <img 
+                                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${u.email}`} 
+                                  alt="" 
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
                             </div>
                             <div>
                               <div className="font-bold">{u.name || u.email.split('@')[0]}</div>

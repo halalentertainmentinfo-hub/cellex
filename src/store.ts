@@ -253,8 +253,10 @@ export const useUserStore = create<UserStore>()(
             const { data, error } = await supabase.from('profiles').insert([{
               name: userData.name,
               email: normalizedEmail,
+              phone: userData.phone,
               password: userData.password, // Store password in Supabase
-              role: 'user'
+              role: 'user',
+              avatar_url: userData.profileImage
             }]).select();
             if (error) throw error;
             if (data) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Mail, Lock, User, Phone, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, Phone, ArrowRight, Eye, EyeOff, Camera } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUserStore, useAuthStore } from '../store';
 import { toast } from 'sonner';
@@ -14,10 +14,25 @@ export const Register = () => {
   const [confirmPassword, setConfirmPassword] = React.useState('');
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+  const [profileImage, setProfileImage] = React.useState<string | null>(null);
+  const [uploading, setUploading] = React.useState(false);
   
   const { registerUser, findUser } = useUserStore();
   const { setUser } = useAuthStore();
   const navigate = useNavigate();
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProfileImage(reader.result as string);
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +47,7 @@ export const Register = () => {
       return;
     }
 
-    await registerUser({ name, email, phone, password });
+    await registerUser({ name, email, phone, password, profileImage: profileImage || undefined });
     
     const newUser = findUser(email);
     if (newUser) {
@@ -60,6 +75,29 @@ export const Register = () => {
           </div>
 
           <form onSubmit={handleRegister} className="space-y-4">
+            {/* Profile Picture Upload */}
+            <div className="flex flex-col items-center mb-6">
+              <div className="relative group">
+                <div className="w-24 h-24 neu-inset rounded-full overflow-hidden flex items-center justify-center bg-black/5 border-2 border-transparent group-hover:border-ios-orange/30 transition-all">
+                  {profileImage ? (
+                    <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <User size={40} className="opacity-20" />
+                  )}
+                </div>
+                <label className="absolute bottom-0 right-0 w-8 h-8 neu-button rounded-full flex items-center justify-center cursor-pointer hover:text-ios-orange transition-colors">
+                  <Camera size={16} />
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                    className="hidden" 
+                  />
+                </label>
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-widest opacity-40 mt-2">Profile Photo</span>
+            </div>
+
             <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase tracking-widest opacity-60 ml-1">Full Name</label>
               <div className="neu-inset flex items-center px-4 py-3 group focus-within:border-ios-orange/50 transition-all">

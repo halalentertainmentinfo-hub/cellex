@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Zap, Search, User, ArrowRight, Cloud, ChevronLeft, ChevronRight, ShoppingCart, Star, Bell } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard';
-import { useProductStore, useNotificationStore, useAuthStore } from '../store';
+import { useProductStore, useNotificationStore, useAuthStore, useCartStore } from '../store';
 import { formatPrice, cn } from '../lib/utils';
 import { toast } from 'sonner';
 import { LOGO_URL } from '../constants';
@@ -13,6 +13,7 @@ export const Home = () => {
   const { products } = useProductStore();
   const { notifications } = useNotificationStore();
   const { user } = useAuthStore();
+  const { items } = useCartStore();
   
   const unreadCount = notifications.filter(n => !n.read).length;
   
@@ -55,6 +56,11 @@ export const Home = () => {
             <div className="flex sm:hidden items-center gap-2">
               <Link to="/cart" className="w-10 h-10 neu-button flex items-center justify-center relative">
                 <ShoppingCart size={18} className="opacity-60" />
+                {items.length > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-ios-orange text-[9px] font-bold flex items-center justify-center rounded-full text-white shadow-lg">
+                    {items.reduce((acc, item) => acc + item.quantity, 0)}
+                  </span>
+                )}
               </Link>
               <Link to="/notifications" className="w-10 h-10 neu-button flex items-center justify-center relative">
                 <Bell size={18} className={cn("opacity-60", unreadCount > 0 && "text-ios-orange opacity-100")} />
@@ -82,6 +88,11 @@ export const Home = () => {
             <div className="hidden sm:flex items-center gap-4">
               <Link to="/cart" className="w-10 h-10 neu-button flex items-center justify-center relative">
                 <ShoppingCart size={18} className="opacity-60" />
+                {items.length > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-ios-orange text-[9px] font-bold flex items-center justify-center rounded-full text-white shadow-lg">
+                    {items.reduce((acc, item) => acc + item.quantity, 0)}
+                  </span>
+                )}
               </Link>
               <Link to="/notifications" className="w-10 h-10 neu-button flex items-center justify-center relative">
                 <Bell size={18} className={cn("opacity-60", unreadCount > 0 && "text-ios-orange opacity-100")} />

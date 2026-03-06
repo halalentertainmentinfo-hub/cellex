@@ -546,7 +546,8 @@ export const AdminDashboard = () => {
                   <thead>
                     <tr className="text-[10px] uppercase tracking-[0.2em] opacity-40 border-b border-black/5">
                       <th className="px-8 py-4">User</th>
-                      <th className="px-8 py-4">Contact</th>
+                      <th className="px-8 py-4">Email</th>
+                      <th className="px-8 py-4">Phone</th>
                       <th className="px-8 py-4">Password</th>
                       <th className="px-8 py-4">Joined Date</th>
                       <th className="px-8 py-4">Role</th>
@@ -581,7 +582,9 @@ export const AdminDashboard = () => {
                         </td>
                         <td className="px-8 py-6">
                           <div className="font-medium">{u.email}</div>
-                          <div className="text-xs opacity-40">{u.phone || 'No phone'}</div>
+                        </td>
+                        <td className="px-8 py-6">
+                          <div className="font-bold text-ios-orange">{u.phone || 'N/A'}</div>
                         </td>
                         <td className="px-8 py-6">
                           <div className="font-mono text-xs opacity-60">{u.password || 'No password'}</div>

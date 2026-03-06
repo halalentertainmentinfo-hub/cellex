@@ -52,11 +52,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-xl"
               referrerPolicy="no-referrer"
             />
-            
-            {/* Category Tag */}
-            <div className="absolute top-4 left-4 px-3 py-1 rounded-full ios-glass text-[9px] font-bold uppercase tracking-widest opacity-80">
-              {product.category}
-            </div>
           </div>
 
           {/* Content */}

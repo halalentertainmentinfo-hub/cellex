@@ -29,6 +29,16 @@ interface CartItem extends Product {
   selectedStorage?: string;
 }
 
+export interface IncompleteOrder {
+  id: string;
+  userId?: string;
+  userName: string;
+  userPhone?: string;
+  items: CartItem[];
+  total: number;
+  createdAt: string;
+}
+
 interface CartStore {
   items: CartItem[];
   addItem: (product: Product, selectedOptions?: { color?: string; ram?: string; storage?: string }) => void;
@@ -52,53 +62,53 @@ export const useCartStore = create<CartStore>()(
         );
         
         if (existingItem) {
-          set({
-            items: items.map((item) =>
-              (item.id === product.id && 
-               item.selectedColor === selectedOptions?.color &&
-               item.selectedRam === selectedOptions?.ram &&
-               item.selectedStorage === selectedOptions?.storage)
-                ? { ...item, quantity: item.quantity + 1 }
-                : item
-            ),
-          });
+          const newItems = items.map((item) =>
+            (item.id === product.id && 
+             item.selectedColor === selectedOptions?.color &&
+             item.selectedRam === selectedOptions?.ram &&
+             item.selectedStorage === selectedOptions?.storage)
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+          set({ items: newItems });
+          useOrderStore.getState().syncIncompleteOrder(newItems, newItems.reduce((acc, item) => acc + item.price * item.quantity, 0), useAuthStore.getState().user);
         } else {
-          set({ 
-            items: [...items, { 
-              ...product, 
-              quantity: 1,
-              selectedColor: selectedOptions?.color,
-              selectedRam: selectedOptions?.ram,
-              selectedStorage: selectedOptions?.storage
-            }] 
-          });
+          const newItems = [...items, { 
+            ...product, 
+            quantity: 1,
+            selectedColor: selectedOptions?.color,
+            selectedRam: selectedOptions?.ram,
+            selectedStorage: selectedOptions?.storage
+          }];
+          set({ items: newItems });
+          useOrderStore.getState().syncIncompleteOrder(newItems, newItems.reduce((acc, item) => acc + item.price * item.quantity, 0), useAuthStore.getState().user);
         }
       },
       removeItem: (productId, selectedOptions) => {
-        set({ 
-          items: get().items.filter((item) => 
-            !(item.id === productId && 
-              item.selectedColor === selectedOptions?.color &&
-              item.selectedRam === selectedOptions?.ram &&
-              item.selectedStorage === selectedOptions?.storage)
-          ) 
-        });
+        const newItems = get().items.filter((item) => 
+          !(item.id === productId && 
+            item.selectedColor === selectedOptions?.color &&
+            item.selectedRam === selectedOptions?.ram &&
+            item.selectedStorage === selectedOptions?.storage)
+        );
+        set({ items: newItems });
+        useOrderStore.getState().syncIncompleteOrder(newItems, newItems.reduce((acc, item) => acc + item.price * item.quantity, 0), useAuthStore.getState().user);
       },
       updateQuantity: (productId, quantity, selectedOptions) => {
         if (quantity <= 0) {
           get().removeItem(productId, selectedOptions);
           return;
         }
-        set({
-          items: get().items.map((item) =>
-            (item.id === productId && 
-             item.selectedColor === selectedOptions?.color &&
-             item.selectedRam === selectedOptions?.ram &&
-             item.selectedStorage === selectedOptions?.storage) 
-              ? { ...item, quantity } 
-              : item
-          ),
-        });
+        const newItems = get().items.map((item) =>
+          (item.id === productId && 
+           item.selectedColor === selectedOptions?.color &&
+           item.selectedRam === selectedOptions?.ram &&
+           item.selectedStorage === selectedOptions?.storage) 
+            ? { ...item, quantity } 
+            : item
+        );
+        set({ items: newItems });
+        useOrderStore.getState().syncIncompleteOrder(newItems, newItems.reduce((acc, item) => acc + item.price * item.quantity, 0), useAuthStore.getState().user);
       },
       clearCart: () => set({ items: [] }),
       get total() {
@@ -315,6 +325,7 @@ interface ProductStore {
   isLoading: boolean;
   fetchProducts: () => Promise<void>;
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
+  updateProduct: (productId: string, product: Partial<Product>) => Promise<void>;
   removeProduct: (productId: string) => Promise<void>;
 }
 
@@ -368,6 +379,31 @@ export const useProductStore = create<ProductStore>()(
           }
         }
         set({ products: get().products.filter((p) => p.id !== productId) });
+      },
+      updateProduct: async (productId, productData) => {
+        if (supabase) {
+          try {
+            const { data, error } = await supabase
+              .from('products')
+              .update(productData)
+              .eq('id', productId)
+              .select();
+            if (error) throw error;
+            if (data) {
+              set({
+                products: get().products.map((p) => (p.id === productId ? data[0] : p)),
+              });
+              return;
+            }
+          } catch (error) {
+            console.error('Error updating product in Supabase:', error);
+          }
+        }
+        set({
+          products: get().products.map((p) =>
+            p.id === productId ? { ...p, ...productData } : p
+          ),
+        });
       },
     }),
     {
@@ -458,8 +494,11 @@ export const useOrderRequestStore = create<OrderRequestStore>()(
 
 interface OrderStore {
   orders: Order[];
+  incompleteOrders: IncompleteOrder[];
   fetchOrders: () => Promise<void>;
+  fetchIncompleteOrders: () => Promise<void>;
   addOrder: (order: Omit<Order, 'id' | 'createdAt' | 'status' | 'invoiceNumber'>, address?: string, phone?: string) => Promise<void>;
+  syncIncompleteOrder: (items: CartItem[], total: number, user?: any) => Promise<void>;
   updateOrderStatus: (orderId: string, status: Order['status']) => Promise<void>;
 }
 
@@ -467,6 +506,7 @@ export const useOrderStore = create<OrderStore>()(
   persist(
     (set, get) => ({
       orders: [],
+      incompleteOrders: [],
       fetchOrders: async () => {
         if (!supabase) return;
         try {
@@ -506,6 +546,54 @@ export const useOrderStore = create<OrderStore>()(
           }
         } catch (error) {
           console.error('Error fetching orders:', error);
+        }
+      },
+      fetchIncompleteOrders: async () => {
+        if (!supabase) return;
+        try {
+          const { data, error } = await supabase
+            .from('incomplete_orders')
+            .select('*')
+            .order('created_at', { ascending: false });
+          
+          if (error) throw error;
+          if (data) {
+            set({ incompleteOrders: data.map((io: any) => ({
+              id: io.id,
+              userId: io.user_id,
+              userName: io.user_name || 'Guest User',
+              userPhone: io.user_phone,
+              items: io.items || [],
+              total: io.total || 0,
+              createdAt: io.created_at
+            })) });
+          }
+        } catch (error) {
+          console.error('Error fetching incomplete orders:', error);
+        }
+      },
+      syncIncompleteOrder: async (items, total, user) => {
+        if (!supabase || items.length === 0) return;
+        try {
+          // Use a session ID or user ID to track the incomplete order
+          const sessionId = localStorage.getItem('cart_session_id') || Math.random().toString(36).substring(7);
+          localStorage.setItem('cart_session_id', sessionId);
+
+          const { error } = await supabase
+            .from('incomplete_orders')
+            .upsert({
+              id: sessionId,
+              user_id: user?.id,
+              user_name: user?.name || 'Guest User',
+              user_phone: user?.phone,
+              items: items,
+              total: total,
+              created_at: new Date().toISOString()
+            });
+          
+          if (error) throw error;
+        } catch (error) {
+          console.error('Error syncing incomplete order:', error);
         }
       },
       addOrder: async (orderData, address = 'Not provided', phone = 'Not provided') => {
@@ -548,6 +636,13 @@ export const useOrderStore = create<OrderStore>()(
               .insert(orderItems);
 
             if (itemsError) throw itemsError;
+
+            // 3. Remove Incomplete Order
+            const sessionId = localStorage.getItem('cart_session_id');
+            if (sessionId) {
+              await supabase.from('incomplete_orders').delete().eq('id', sessionId);
+              localStorage.removeItem('cart_session_id');
+            }
 
             // Refresh orders
             get().fetchOrders();
@@ -626,6 +721,7 @@ interface NotificationStore {
   fetchNotifications: () => Promise<void>;
   addNotification: (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => Promise<void>;
   markAsRead: (id: string) => void;
+  incrementViewCount: (id: string) => void;
   deleteNotification: (id: string) => void;
   clearAll: () => void;
 }
@@ -691,6 +787,13 @@ export const useNotificationStore = create<NotificationStore>()(
         set({
           notifications: get().notifications.map((n) =>
             n.id === id ? { ...n, read: true } : n
+          ),
+        });
+      },
+      incrementViewCount: (id) => {
+        set({
+          notifications: get().notifications.map((n) =>
+            n.id === id ? { ...n, views: (n.views || 0) + 1 } : n
           ),
         });
       },

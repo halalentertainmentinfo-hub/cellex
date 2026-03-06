@@ -18,7 +18,10 @@ export const MOCK_PRODUCTS = [
     images: ['https://picsum.photos/seed/iphone16/800/800'],
     specs: { display: '6.9" Super Retina XDR', chip: 'A18 Pro', camera: '48MP Fusion' },
     stock: 50,
-    description: 'The ultimate iPhone with the largest display ever and the most powerful chip.'
+    description: 'The ultimate iPhone with the largest display ever and the most powerful chip.',
+    colors: ['Natural Titanium', 'Black Titanium', 'White Titanium', 'Blue Titanium'],
+    ramOptions: ['8GB'],
+    storageOptions: ['256GB', '512GB', '1TB']
   },
   {
     id: '2',
@@ -29,7 +32,10 @@ export const MOCK_PRODUCTS = [
     images: ['https://picsum.photos/seed/macbookm4/800/800'],
     specs: { display: '14" Liquid Retina XDR', chip: 'M4 Max', ram: '32GB' },
     stock: 20,
-    description: 'The most advanced laptop for demanding workflows.'
+    description: 'The most advanced laptop for demanding workflows.',
+    colors: ['Space Black', 'Silver'],
+    ramOptions: ['16GB', '32GB', '64GB'],
+    storageOptions: ['512GB', '1TB', '2TB']
   },
   {
     id: '3',

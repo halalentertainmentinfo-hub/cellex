@@ -60,10 +60,9 @@ export const ProductDetail = () => {
     toast.success(`${product.name} added to cart!`, {
       description: `${quantity} item(s) added successfully.`,
       style: {
-        background: 'rgba(255, 255, 255, 0.1)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        color: '#fff',
+        background: 'var(--card-bg)',
+        border: '1px solid var(--glass-border)',
+        color: 'var(--foreground)',
       }
     });
   };
@@ -116,9 +115,6 @@ export const ProductDetail = () => {
           <div className="flex flex-col">
             <div className="mb-8">
               <div className="flex items-center gap-4 mb-4">
-                <span className="px-3 py-1 rounded-full bg-neon-cyan/10 text-neon-cyan text-[10px] font-bold uppercase tracking-wider border border-neon-cyan/20">
-                  {product.category}
-                </span>
                 <div className="flex items-center gap-1">
                   <Star size={14} className="text-yellow-400 fill-yellow-400" />
                   <span className="text-sm font-bold">4.9 (128 reviews)</span>

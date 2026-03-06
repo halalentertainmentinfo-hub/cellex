@@ -5,6 +5,7 @@ import {
   Package, 
   ShoppingBag, 
   Users, 
+  User,
   TrendingUp, 
   Plus, 
   MoreVertical,
@@ -22,18 +23,20 @@ import {
   XCircle,
   Clock,
   Download,
-  RefreshCw
+  RefreshCw,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice, cn } from '../lib/utils';
 import { generateOrderPDF } from '../lib/pdf';
 import { MOCK_PRODUCTS } from '../lib/supabase';
-import { useUserStore, useOrderStore, useAuthStore, useProductStore, useOrderRequestStore, useNotificationStore } from '../store';
+import { useUserStore, useOrderStore, useAuthStore, useProductStore, useOrderRequestStore, useNotificationStore, Product } from '../store';
 import { toast } from 'sonner';
 
 export const AdminDashboard = () => {
-  const { orders, updateOrderStatus, fetchOrders } = useOrderStore();
-  const { products, addProduct, fetchProducts } = useProductStore();
+  const { orders, updateOrderStatus, fetchOrders, incompleteOrders, fetchIncompleteOrders } = useOrderStore();
+  const { products, addProduct, updateProduct, removeProduct, fetchProducts } = useProductStore();
   const { requests, updateRequestStatus, fetchRequests } = useOrderRequestStore();
   const { notifications, addNotification, fetchNotifications } = useNotificationStore();
   const { users, fetchUsers } = useUserStore();
@@ -48,6 +51,7 @@ export const AdminDashboard = () => {
       fetchOrders(),
       fetchProducts(),
       fetchRequests(),
+      fetchIncompleteOrders(),
       fetchNotifications(),
       fetchUsers()
     ]);
@@ -55,8 +59,9 @@ export const AdminDashboard = () => {
     toast.success('Data refreshed!');
   };
 
-  const [activeTab, setActiveTab] = React.useState<'dashboard' | 'users' | 'orders' | 'confirmed' | 'cancelled' | 'products' | 'requests' | 'notifications'>('dashboard');
+  const [activeTab, setActiveTab] = React.useState<'dashboard' | 'users' | 'orders' | 'confirmed' | 'cancelled' | 'products' | 'requests' | 'notifications' | 'incomplete_orders'>('dashboard');
   const [isAddingProduct, setIsAddingProduct] = React.useState(false);
+  const [editingProduct, setEditingProduct] = React.useState<string | null>(null);
   const [activeMenuId, setActiveMenuId] = React.useState<string | null>(null);
   
   const [notifTitle, setNotifTitle] = React.useState('');
@@ -127,20 +132,59 @@ export const AdminDashboard = () => {
     navigate('/login');
   };
 
-  const handleAddProduct = async (e: React.FormEvent) => {
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct(product.id);
+    setNewProduct({
+      name: product.name,
+      price: product.price,
+      category: product.category || 'Smartphones',
+      brand: product.brand,
+      images: product.images,
+      specs: product.specs || {},
+      stock: product.stock,
+      description: product.description,
+      battery: product.battery || '',
+      displaySize: product.displaySize || '',
+      colors: Array.isArray(product.colors) ? product.colors.join(', ') : '',
+      ramOptions: Array.isArray(product.ramOptions) ? product.ramOptions.join(', ') : '',
+      storageOptions: Array.isArray(product.storageOptions) ? product.storageOptions.join(', ') : '',
+      isFeatured: product.isFeatured || false
+    });
+    setIsAddingProduct(true);
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      await removeProduct(productId);
+      toast.success('Product deleted successfully!');
+    }
+  };
+
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newProduct.images.length === 0) {
       toast.error('Please upload a product image');
       return;
     }
-    await addProduct({
+
+    const productData = {
       ...newProduct,
-      colors: newProduct.colors.split(',').map(c => c.trim()).filter(c => c),
-      ramOptions: newProduct.ramOptions.split(',').map(r => r.trim()).filter(r => r),
-      storageOptions: newProduct.storageOptions.split(',').map(s => s.trim()).filter(s => s),
+      colors: typeof newProduct.colors === 'string' ? newProduct.colors.split(',').map(c => c.trim()).filter(c => c) : newProduct.colors,
+      ramOptions: typeof newProduct.ramOptions === 'string' ? newProduct.ramOptions.split(',').map(r => r.trim()).filter(r => r) : newProduct.ramOptions,
+      storageOptions: typeof newProduct.storageOptions === 'string' ? newProduct.storageOptions.split(',').map(s => s.trim()).filter(s => s) : newProduct.storageOptions,
       isFeatured: newProduct.isFeatured
-    } as any);
+    };
+
+    if (editingProduct) {
+      await updateProduct(editingProduct, productData as any);
+      toast.success('Product updated successfully!');
+    } else {
+      await addProduct(productData as any);
+      toast.success('Product added successfully!');
+    }
+
     setIsAddingProduct(false);
+    setEditingProduct(null);
     setNewProduct({
       name: '',
       price: 0,
@@ -157,7 +201,6 @@ export const AdminDashboard = () => {
       storageOptions: '',
       isFeatured: false
     });
-    toast.success('Product added successfully!');
   };
   
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
@@ -222,6 +265,7 @@ export const AdminDashboard = () => {
             { id: 'products', label: 'Products', icon: Package },
             { id: 'requests', label: 'Requests', icon: MessageSquare },
             { id: 'notifications', label: 'Notifications', icon: Bell },
+            { id: 'incomplete_orders', label: 'Incomplete', icon: Clock },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -239,14 +283,98 @@ export const AdminDashboard = () => {
           ))}
         </div>
 
+        {activeTab === 'incomplete_orders' && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-8"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-3xl font-display font-bold tracking-tight">Incomplete Orders</h2>
+              <div className="flex items-center gap-4">
+                <div className="px-4 py-2 neu-inset rounded-xl text-xs font-bold">
+                  {incompleteOrders.length} Abandoned Carts
+                </div>
+                <button 
+                  onClick={fetchIncompleteOrders}
+                  className="w-10 h-10 neu-button flex items-center justify-center hover:text-ios-orange transition-all"
+                >
+                  <RefreshCw size={18} />
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+              {incompleteOrders.length > 0 ? (
+                incompleteOrders.map((order) => (
+                  <div key={order.id} className="neu-flat p-8">
+                    <div className="flex flex-col md:flex-row justify-between gap-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 neu-button flex items-center justify-center text-ios-orange">
+                            <User size={20} />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-bold">{order.userName}</h3>
+                            <p className="text-xs opacity-40 font-bold uppercase tracking-widest">{order.userPhone || 'No phone provided'}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs opacity-60">
+                          <Clock size={14} />
+                          <span>Last active: {new Date(order.createdAt).toLocaleString()}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex-1 max-w-md">
+                        <h4 className="text-xs font-bold uppercase tracking-widest opacity-40 mb-4">Cart Items</h4>
+                        <div className="space-y-3">
+                          {order.items.map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-3 neu-inset rounded-xl">
+                              <div className="flex items-center gap-3">
+                                <img src={item.images[0]} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                                <div>
+                                  <p className="text-sm font-bold">{item.name}</p>
+                                  <p className="text-[10px] opacity-40">Qty: {item.quantity} • {item.selectedRam}/{item.selectedStorage}</p>
+                                </div>
+                              </div>
+                              <span className="text-sm font-bold">{formatPrice(item.price * item.quantity)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="text-right space-y-4">
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-widest opacity-40 mb-1">Potential Total</p>
+                          <p className="text-3xl font-display font-bold text-ios-orange">{formatPrice(order.total)}</p>
+                        </div>
+                        <button className="neu-button px-6 py-3 text-xs font-bold uppercase tracking-widest hover:text-ios-orange transition-all">
+                          Send Reminder
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="neu-flat p-20 text-center">
+                  <div className="w-20 h-20 neu-button flex items-center justify-center mx-auto mb-6 text-ios-orange opacity-20">
+                    <ShoppingBag size={40} />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">No incomplete orders</h3>
+                  <p className="text-[var(--text-secondary)]">All carts are either empty or have been converted to orders.</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
         {activeTab === 'dashboard' && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-12">
             {/* Daily Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { label: 'Daily Sales', value: formatPrice(totalRevenue), icon: TrendingUp, color: 'text-ios-orange' },
-                { label: 'Stock In', value: '42 Units', icon: ArrowDownCircle, color: 'text-emerald-500' },
-                { label: 'Stock Out', value: '12 Units', icon: ArrowUpCircle, color: 'text-red-500' },
+                { label: 'Daily Sales', value: formatPrice(dailySales), icon: TrendingUp, color: 'text-ios-orange' },
+                { label: 'Stock In', value: `${stockIn} Units`, icon: ArrowDownCircle, color: 'text-emerald-500' },
+                { label: 'Stock Out', value: `${stockOut} Units`, icon: ArrowUpCircle, color: 'text-red-500' },
                 { label: 'Total Orders', value: orders.length.toString(), icon: ShoppingBag, color: 'text-ios-orange' },
               ].map((stat, i) => (
                 <div key={i} className="neu-flat p-8">
@@ -565,7 +693,26 @@ export const AdminDashboard = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-12">
             <div className="flex justify-end">
               <button 
-                onClick={() => setIsAddingProduct(true)}
+                onClick={() => {
+                  setEditingProduct(null);
+                  setNewProduct({
+                    name: '',
+                    price: 0,
+                    category: 'Smartphones',
+                    brand: '',
+                    images: [],
+                    specs: {},
+                    stock: 10,
+                    description: '',
+                    battery: '',
+                    displaySize: '',
+                    colors: '',
+                    ramOptions: '',
+                    storageOptions: '',
+                    isFeatured: false
+                  });
+                  setIsAddingProduct(true);
+                }}
                 className="ios-button-primary flex items-center gap-2"
               >
                 <Plus size={20} />
@@ -579,15 +726,24 @@ export const AdminDashboard = () => {
                     <img src={product.images[0]} alt="" className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-700" referrerPolicy="no-referrer" />
                   </div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">{product.category}</span>
+                    <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">{product.brand}</span>
                     <span className="text-sm font-bold text-ios-orange">{formatPrice(product.price)}</span>
                   </div>
                   <h3 className="font-bold text-lg mb-4 truncate">{product.name}</h3>
                   <div className="flex items-center justify-between">
                     <div className="text-xs font-medium opacity-60">Stock: {product.stock}</div>
                     <div className="flex gap-2">
-                      <button className="neu-button p-2 text-ios-orange">
-                        <Plus size={16} />
+                      <button 
+                        onClick={() => handleEditProduct(product)}
+                        className="neu-button p-2 text-ios-orange"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteProduct(product.id)}
+                        className="neu-button p-2 text-red-500"
+                      >
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
@@ -724,9 +880,15 @@ export const AdminDashboard = () => {
                 </div>
                 
                 <div className="neu-flat p-8">
-                  <h3 className="text-xl font-bold mb-6 tracking-tight">Recent Broadcasts</h3>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold tracking-tight">Recent Broadcasts</h3>
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-full ios-glass text-[10px] font-bold text-ios-orange">
+                      <Eye size={12} />
+                      {notifications.reduce((acc, n) => acc + (n.views || 0), 0)} Total Views
+                    </div>
+                  </div>
                   <div className="space-y-4">
-                    {useNotificationStore.getState().notifications.slice(0, 3).map((n) => (
+                    {notifications.slice(0, 3).map((n) => (
                       <div key={n.id} className="p-4 border-b border-black/5 last:border-0">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-bold">{n.title}</span>
@@ -763,8 +925,8 @@ export const AdminDashboard = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             className="ios-card w-full max-w-lg p-10 relative z-10"
           >
-            <h2 className="text-3xl font-bold mb-8 tracking-tight">Add New Product</h2>
-            <form onSubmit={handleAddProduct} className="space-y-6">
+            <h2 className="text-3xl font-bold mb-8 tracking-tight">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
+            <form onSubmit={handleSaveProduct} className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Product Name</label>
@@ -787,18 +949,7 @@ export const AdminDashboard = () => {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Category</label>
-                  <input 
-                    type="text" 
-                    required
-                    value={newProduct.category}
-                    onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
-                    placeholder="e.g. Smartphones"
-                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
-                  />
-                </div>
+              <div className="grid grid-cols-1 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Brand</label>
                   <input 
@@ -914,7 +1065,26 @@ export const AdminDashboard = () => {
               <div className="flex gap-4 pt-4">
                 <button 
                   type="button"
-                  onClick={() => setIsAddingProduct(false)}
+                  onClick={() => {
+                    setIsAddingProduct(false);
+                    setEditingProduct(null);
+                    setNewProduct({
+                      name: '',
+                      price: 0,
+                      category: 'Smartphones',
+                      brand: '',
+                      images: [],
+                      specs: {},
+                      stock: 10,
+                      description: '',
+                      battery: '',
+                      displaySize: '',
+                      colors: '',
+                      ramOptions: '',
+                      storageOptions: '',
+                      isFeatured: false
+                    });
+                  }}
                   className="flex-1 ios-button-secondary py-4"
                 >
                   Cancel
@@ -923,7 +1093,7 @@ export const AdminDashboard = () => {
                   type="submit"
                   className="flex-1 ios-button-primary py-4"
                 >
-                  Add Product
+                  {editingProduct ? 'Save Changes' : 'Add Product'}
                 </button>
               </div>
             </form>

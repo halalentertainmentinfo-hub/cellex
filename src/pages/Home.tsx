@@ -2,7 +2,8 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Zap, Search, User, ArrowRight, Cloud, ChevronLeft, ChevronRight, ShoppingCart, Star, Bell } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useProductStore, useCartStore, useNotificationStore, useAuthStore } from '../store';
+import { ProductCard } from '../components/ProductCard';
+import { useProductStore, useNotificationStore, useAuthStore } from '../store';
 import { formatPrice, cn } from '../lib/utils';
 import { toast } from 'sonner';
 import { LOGO_URL } from '../constants';
@@ -10,7 +11,6 @@ import { LOGO_URL } from '../constants';
 export const Home = () => {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const { products } = useProductStore();
-  const { addItem } = useCartStore();
   const { notifications } = useNotificationStore();
   const { user } = useAuthStore();
   
@@ -23,22 +23,11 @@ export const Home = () => {
   const baseProducts = allFeaturedProducts.length > 0 ? allFeaturedProducts : products;
   
   // Display 8 products initially (2 rows of 4), or all if expanded
-  const displayProducts = isExpanded ? baseProducts : baseProducts.slice(0, 8);
+  // Sort products by ID or creation date if available (mocking with reverse for now to show newest)
+  const sortedProducts = [...products].reverse();
+  const displayProducts = isExpanded ? sortedProducts : sortedProducts.slice(0, 8);
 
   const profileLink = user ? (user.role === 'admin' ? '/admin' : '/account') : '/login';
-
-  const handleAddToCart = (product: any, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addItem(product);
-    toast.success(`${product.name} added to cart!`, {
-      style: {
-        background: 'var(--card-bg)',
-        border: '1px solid var(--glass-border)',
-        color: 'var(--foreground)',
-      }
-    });
-  };
 
   const [homeSearch, setHomeSearch] = React.useState('');
   const navigate = useNavigate();
@@ -118,9 +107,24 @@ export const Home = () => {
                   <Zap size={20} className="text-ios-orange" />
                 </div>
                 <h2 className="text-4xl font-display font-bold tracking-tighter mb-4">Premium<br />Tech Only.</h2>
-                <p className="opacity-60 text-sm leading-relaxed max-w-[200px]">
+                <p className="opacity-60 text-sm leading-relaxed max-w-[200px] mb-8">
                   Curated selection of the world's most advanced gadgets.
                 </p>
+                
+                {/* Prominent Search Bar */}
+                <form onSubmit={handleHomeSearch} className="neu-inset p-2 flex items-center gap-3 group focus-within:ring-2 ring-ios-orange/20 transition-all mb-8">
+                  <Search size={18} className="ml-2 opacity-40 group-focus-within:opacity-100 group-focus-within:text-ios-orange" />
+                  <input 
+                    type="text" 
+                    placeholder="Search gadgets..." 
+                    value={homeSearch}
+                    onChange={(e) => setHomeSearch(e.target.value)}
+                    className="bg-transparent border-none outline-none text-sm w-full opacity-60 group-focus-within:opacity-100 py-2"
+                  />
+                  <button type="submit" className="neu-button p-2 text-ios-orange">
+                    <ArrowRight size={18} />
+                  </button>
+                </form>
               </div>
               
               <div className="mt-12">
@@ -177,68 +181,18 @@ export const Home = () => {
           </div>
         </div>
 
-        {/* Featured Products Section */}
+        {/* Latest Products Section */}
         <div className="space-y-8">
           <div className="flex items-center justify-between px-4">
-            <h2 className="text-3xl font-display font-bold tracking-tight">Featured <span className="text-ios-orange">Products</span></h2>
+            <h2 className="text-3xl font-display font-bold tracking-tight">Latest <span className="text-ios-orange">Arrivals</span></h2>
             <Link to="/shop" className="text-sm font-bold opacity-40 hover:opacity-100 transition-opacity flex items-center gap-2">
               View All <ChevronRight size={16} />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             {displayProducts.map((product) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="group relative"
-              >
-                <Link to={`/product/${product.id}`} className="block">
-                  <div className="neu-flat p-6 h-full flex flex-col">
-                    <div className="relative aspect-square rounded-2xl overflow-hidden neu-inset mb-6 p-4">
-                      <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-xl"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute top-4 left-4 px-3 py-1 rounded-full ios-glass text-[9px] font-bold uppercase tracking-widest opacity-80">
-                        {product.category}
-                      </div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">{product.brand}</span>
-                        <div className="flex items-center gap-1 opacity-60">
-                          <Star size={10} className="text-ios-gold fill-ios-gold" />
-                          <span className="text-[10px] font-bold">4.9</span>
-                        </div>
-                      </div>
-                      
-                      <h3 className="text-lg font-bold mb-3 group-hover:text-ios-orange transition-colors line-clamp-1 tracking-tight">
-                        {product.name}
-                      </h3>
-                      
-                      <div className="mt-auto flex items-center justify-between">
-                        <span className="text-xl font-display font-bold text-ios-orange">
-                          {formatPrice(product.price)}
-                        </span>
-                        <motion.button 
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={(e) => handleAddToCart(product, e)}
-                          className="w-10 h-10 neu-button flex items-center justify-center hover:text-ios-orange transition-all duration-300"
-                        >
-                          <ShoppingCart size={16} />
-                        </motion.button>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
 

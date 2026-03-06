@@ -6,7 +6,7 @@ import { cn } from '../lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 
 export const Notifications = () => {
-  const { notifications, markAsRead, clearAll, deleteNotification } = useNotificationStore();
+  const { notifications, markAsRead, clearAll, deleteNotification, incrementViewCount } = useNotificationStore();
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -116,7 +116,10 @@ export const Notifications = () => {
                         "neu-flat p-6 relative group transition-all duration-500",
                         !n.read && "ring-2 ring-ios-orange/20"
                       )}
-                      onClick={() => markAsRead(n.id)}
+                      onClick={() => {
+                        markAsRead(n.id);
+                        incrementViewCount(n.id);
+                      }}
                     >
                       <div className="flex flex-col sm:flex-row gap-6">
                         <div className={cn(

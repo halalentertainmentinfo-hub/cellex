@@ -108,7 +108,7 @@ export const Cart = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                       <div>
                         <h3 className="text-xl font-bold mb-1 tracking-tight">{item.name}</h3>
-                        <p className="text-xs font-bold uppercase tracking-widest opacity-40">{item.category} • {item.brand}</p>
+                        <p className="text-xs font-bold uppercase tracking-widest opacity-40">{item.brand}</p>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {item.selectedColor && (
                             <span className="px-2 py-1 rounded-lg bg-ios-orange/10 text-ios-orange text-[9px] font-bold uppercase tracking-widest border border-ios-orange/20">
@@ -173,21 +173,6 @@ export const Cart = () => {
                 </motion.div>
               ))}
             </AnimatePresence>
-
-            {/* Promo Code - Moved here */}
-            <div className="ios-card p-6 mt-12 max-w-md">
-              <h3 className="text-xs font-bold mb-4 uppercase tracking-widest opacity-40">Promo Code</h3>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Enter code"
-                  className="flex-1 bg-white/5 border border-white/10 rounded-full px-5 py-2 text-sm outline-none focus:border-ios-orange/50 transition-all"
-                />
-                <button className="px-5 py-2 ios-glass rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all">
-                  Apply
-                </button>
-              </div>
-            </div>
           </div>
 
           {/* Summary */}
@@ -267,6 +252,21 @@ export const Cart = () => {
                   >
                     <CreditCard size={20} />
                     <span className="text-[10px] font-bold uppercase tracking-widest">Credit Card</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Promo Code - Repositioned */}
+              <div className="mb-8">
+                <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1 mb-2 block">Promo Code</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter code"
+                    className="flex-1 bg-white/5 border border-white/10 rounded-full px-5 py-2 text-sm outline-none focus:border-ios-orange/50 transition-all"
+                  />
+                  <button className="px-5 py-2 ios-glass rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all">
+                    Apply
                   </button>
                 </div>
               </div>

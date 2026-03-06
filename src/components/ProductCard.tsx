@@ -45,11 +45,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <Link to={`/product/${product.id}`} className="block h-full">
         <div className="neu-flat overflow-hidden p-3 sm:p-6 h-full flex flex-col">
           {/* Image Container */}
-          <div className="relative aspect-square rounded-2xl overflow-hidden neu-inset mb-4 sm:mb-6 p-2 sm:p-4">
+          <div className="relative aspect-square rounded-2xl overflow-hidden neu-inset mb-4 sm:mb-6">
             <img
               src={product.images[0]}
               alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-xl"
+              className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-125 rounded-xl"
               referrerPolicy="no-referrer"
             />
           </div>

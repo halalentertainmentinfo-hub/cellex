@@ -184,7 +184,7 @@ export const Home = () => {
         {/* Latest Products Section */}
         <div className="space-y-8">
           <div className="flex items-center justify-between px-4">
-            <h2 className="text-3xl font-display font-bold tracking-tight">Latest <span className="text-ios-orange">Arrivals</span></h2>
+            <h2 className="text-3xl font-display font-bold tracking-tight">Future <span className="text-ios-orange">Product</span></h2>
             <Link to="/shop" className="text-sm font-bold opacity-40 hover:opacity-100 transition-opacity flex items-center gap-2">
               View All <ChevronRight size={16} />
             </Link>

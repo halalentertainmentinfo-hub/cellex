@@ -59,6 +59,10 @@ export const AdminDashboard = () => {
     toast.success('Data refreshed!');
   };
 
+  React.useEffect(() => {
+    handleRefresh();
+  }, []);
+
   const [activeTab, setActiveTab] = React.useState<'dashboard' | 'users' | 'orders' | 'confirmed' | 'cancelled' | 'products' | 'requests' | 'notifications' | 'incomplete_orders'>('dashboard');
   const [isAddingProduct, setIsAddingProduct] = React.useState(false);
   const [editingProduct, setEditingProduct] = React.useState<string | null>(null);
@@ -290,14 +294,20 @@ export const AdminDashboard = () => {
             className="space-y-8"
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-display font-bold tracking-tight">Incomplete Orders</h2>
+              <div>
+                <h2 className="text-3xl font-display font-bold tracking-tight">Incomplete Orders</h2>
+                <p className="text-sm opacity-40 mt-1">Users who added items to cart but haven't checked out yet.</p>
+              </div>
               <div className="flex items-center gap-4">
-                <div className="px-4 py-2 neu-inset rounded-xl text-xs font-bold">
+                <div className="px-4 py-2 neu-inset rounded-xl text-xs font-bold text-ios-orange">
                   {incompleteOrders.length} Abandoned Carts
                 </div>
                 <button 
                   onClick={fetchIncompleteOrders}
-                  className="w-10 h-10 neu-button flex items-center justify-center hover:text-ios-orange transition-all"
+                  className={cn(
+                    "w-10 h-10 neu-button flex items-center justify-center hover:text-ios-orange transition-all",
+                    isRefreshing && "animate-spin"
+                  )}
                 >
                   <RefreshCw size={18} />
                 </button>
@@ -307,50 +317,97 @@ export const AdminDashboard = () => {
             <div className="grid grid-cols-1 gap-6">
               {incompleteOrders.length > 0 ? (
                 incompleteOrders.map((order) => (
-                  <div key={order.id} className="neu-flat p-8">
-                    <div className="flex flex-col md:flex-row justify-between gap-6">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 neu-button flex items-center justify-center text-ios-orange">
-                            <User size={20} />
+                  <div key={order.id} className="neu-flat p-8 group hover:bg-white/[0.02] transition-colors">
+                    <div className="flex flex-col lg:flex-row justify-between gap-10">
+                      {/* User Info */}
+                      <div className="lg:w-1/4 space-y-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 neu-button flex items-center justify-center text-ios-orange overflow-hidden">
+                            <img 
+                              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${order.userName}`} 
+                              alt="" 
+                              className="w-full h-full object-cover"
+                            />
                           </div>
                           <div>
-                            <h3 className="text-lg font-bold">{order.userName}</h3>
-                            <p className="text-xs opacity-40 font-bold uppercase tracking-widest">{order.userPhone || 'No phone provided'}</p>
+                            <h3 className="text-lg font-bold truncate max-w-[150px]">{order.userName}</h3>
+                            <span className="px-2 py-0.5 rounded-full bg-ios-orange/10 text-ios-orange text-[8px] font-bold uppercase tracking-widest border border-ios-orange/20">
+                              Potential Customer
+                            </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 text-xs opacity-60">
-                          <Clock size={14} />
-                          <span>Last active: {new Date(order.createdAt).toLocaleString()}</span>
+                        
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3 text-sm">
+                            <Users size={16} className="text-ios-orange opacity-60" />
+                            <span className="font-medium">{order.userPhone || 'No phone provided'}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs opacity-40">
+                            <Clock size={16} />
+                            <span>Cart active since: {new Date(order.createdAt).toLocaleString()}</span>
+                          </div>
                         </div>
+
+                        <button 
+                          onClick={() => {
+                            const user = users.find(u => u.id === order.userId || u.name === order.userName);
+                            if (user) {
+                              useAuthStore.getState().setUser(user);
+                              navigate('/account');
+                              toast.success(`Viewing account of ${user.name}`);
+                            } else {
+                              toast.error('User account not found');
+                            }
+                          }}
+                          className="w-full py-3 neu-button text-[10px] font-bold uppercase tracking-widest hover:text-ios-orange transition-all"
+                        >
+                          View Account
+                        </button>
                       </div>
 
-                      <div className="flex-1 max-w-md">
-                        <h4 className="text-xs font-bold uppercase tracking-widest opacity-40 mb-4">Cart Items</h4>
-                        <div className="space-y-3">
+                      {/* Cart Items */}
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-xs font-bold uppercase tracking-widest opacity-40">Cart Contents</h4>
+                          <span className="text-[10px] font-bold opacity-40">{order.items.length} Items</span>
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-4">
                           {order.items.map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-3 neu-inset rounded-xl">
-                              <div className="flex items-center gap-3">
-                                <img src={item.images[0]} alt="" className="w-10 h-10 rounded-lg object-cover" />
-                                <div>
-                                  <p className="text-sm font-bold">{item.name}</p>
-                                  <p className="text-[10px] opacity-40">Qty: {item.quantity} • {item.selectedRam}/{item.selectedStorage}</p>
-                                </div>
+                            <div key={idx} className="flex items-center gap-4 p-4 neu-inset rounded-2xl">
+                              <div className="w-16 h-16 rounded-xl overflow-hidden bg-white/5 p-1">
+                                <img src={item.images[0]} alt="" className="w-full h-full object-cover rounded-lg" />
                               </div>
-                              <span className="text-sm font-bold">{formatPrice(item.price * item.quantity)}</span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold truncate">{item.name}</p>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {item.selectedColor && <span className="px-1 py-0.5 bg-ios-orange/10 text-ios-orange rounded-[4px] text-[7px] font-bold uppercase">{item.selectedColor}</span>}
+                                  {item.selectedRam && <span className="px-1 py-0.5 bg-blue-500/10 text-blue-400 rounded-[4px] text-[7px] font-bold uppercase">{item.selectedRam}</span>}
+                                  {item.selectedStorage && <span className="px-1 py-0.5 bg-purple-500/10 text-purple-400 rounded-[4px] text-[7px] font-bold uppercase">{item.selectedStorage}</span>}
+                                </div>
+                                <p className="text-[10px] opacity-40 mt-1">Quantity: {item.quantity}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs font-bold">{formatPrice(item.price * item.quantity)}</p>
+                              </div>
                             </div>
                           ))}
                         </div>
                       </div>
 
-                      <div className="text-right space-y-4">
-                        <div>
-                          <p className="text-xs font-bold uppercase tracking-widest opacity-40 mb-1">Potential Total</p>
-                          <p className="text-3xl font-display font-bold text-ios-orange">{formatPrice(order.total)}</p>
+                      {/* Summary & Action */}
+                      <div className="lg:w-1/5 flex flex-col justify-between items-end">
+                        <div className="text-right">
+                          <p className="text-xs font-bold uppercase tracking-widest opacity-40 mb-1">Cart Value</p>
+                          <p className="text-4xl font-display font-bold text-ios-orange">{formatPrice(order.total)}</p>
                         </div>
-                        <button className="neu-button px-6 py-3 text-xs font-bold uppercase tracking-widest hover:text-ios-orange transition-all">
-                          Send Reminder
-                        </button>
+                        
+                        <div className="space-y-3 w-full">
+                          <button className="w-full py-4 ios-button-primary text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+                            <Send size={14} />
+                            Send Offer
+                          </button>
+                          <p className="text-[9px] text-center opacity-30 italic">User will see this in their notifications</p>
+                        </div>
                       </div>
                     </div>
                   </div>

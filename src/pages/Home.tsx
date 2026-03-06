@@ -40,7 +40,7 @@ export const Home = () => {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-6">
+    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Top Navigation Bar (Neumorphic) */}
         <div className="neu-flat p-4 mb-8 flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 gap-4 sm:gap-0">
@@ -96,8 +96,8 @@ export const Home = () => {
           </div>
         </div>
 
-        {/* Main Bento Grid */}
-        <div className="grid lg:grid-cols-[400px_1fr] gap-8 mb-12">
+        {/* Main Bento Grid - Hidden on Mobile */}
+        <div className="hidden lg:grid lg:grid-cols-[400px_1fr] gap-8 mb-12">
           {/* Left Column */}
           <div className="space-y-8">
             {/* Hero Promo Card */}
@@ -202,7 +202,7 @@ export const Home = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="neu-button px-10 py-4 text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-3 hover:text-ios-orange transition-all group"
+                className="neu-button px-6 py-3 sm:px-10 sm:py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-3 hover:text-ios-orange transition-all group"
               >
                 {isExpanded ? (
                   <>

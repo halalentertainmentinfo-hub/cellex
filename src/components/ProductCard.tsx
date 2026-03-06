@@ -43,9 +43,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       className="group relative h-full"
     >
       <Link to={`/product/${product.id}`} className="block h-full">
-        <div className="neu-flat overflow-hidden p-6 h-full flex flex-col">
+        <div className="neu-flat overflow-hidden p-3 sm:p-6 h-full flex flex-col">
           {/* Image Container */}
-          <div className="relative aspect-square rounded-2xl overflow-hidden neu-inset mb-6 p-4">
+          <div className="relative aspect-square rounded-2xl overflow-hidden neu-inset mb-4 sm:mb-6 p-2 sm:p-4">
             <img
               src={product.images[0]}
               alt={product.name}
@@ -64,21 +64,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </div>
             </div>
             
-            <h3 className="text-lg font-bold mb-3 group-hover:text-ios-orange transition-colors line-clamp-1 tracking-tight">
+            <h3 className="text-sm sm:text-lg font-bold mb-2 sm:mb-4 group-hover:text-ios-orange transition-colors line-clamp-1 tracking-tight">
               {product.name}
             </h3>
             
-            <div className="mt-auto flex items-center justify-between">
-              <span className="text-xl font-display font-bold text-ios-orange">
+            <div className="mt-auto flex items-center justify-between gap-2">
+              <span className="text-lg sm:text-xl font-display font-bold text-ios-orange truncate">
                 {formatPrice(product.price)}
               </span>
               <motion.button 
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handleAddToCart}
-                className="w-10 h-10 neu-button flex items-center justify-center hover:text-ios-orange transition-all duration-300"
+                className="w-9 h-9 sm:w-10 sm:h-10 neu-button flex-shrink-0 flex items-center justify-center hover:text-ios-orange transition-all duration-300"
               >
-                <ShoppingCart size={16} />
+                <ShoppingCart size={14} className="sm:hidden" />
+                <ShoppingCart size={16} className="hidden sm:block" />
               </motion.button>
             </div>
           </div>

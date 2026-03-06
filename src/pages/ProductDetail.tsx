@@ -36,7 +36,13 @@ export const ProductDetail = () => {
     );
   }
 
+  const isStockOut = product.stock <= 0;
+
   const handleAddToCart = () => {
+    if (isStockOut) {
+      toast.error('This product is currently out of stock');
+      return;
+    }
     if (product.colors?.length && !selectedColor) {
       toast.error('Please select a color');
       return;
@@ -85,8 +91,18 @@ export const ProductDetail = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="aspect-square neu-flat p-4 rounded-3xl overflow-hidden group/zoom"
+              className={cn(
+                "aspect-square neu-flat p-4 rounded-3xl overflow-hidden group/zoom relative",
+                isStockOut && "grayscale opacity-80"
+              )}
             >
+              {isStockOut && (
+                <div className="absolute top-6 right-6 z-10">
+                  <span className="px-4 py-2 bg-red-500 text-white text-xs font-bold uppercase tracking-widest rounded-full shadow-2xl">
+                    Stock Out
+                  </span>
+                </div>
+              )}
               <img
                 src={product.images[selectedImage]}
                 alt={product.name}
@@ -238,13 +254,17 @@ export const ProductDetail = () => {
                 </div>
                 
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={!isStockOut ? { scale: 1.02 } : {}}
+                  whileTap={!isStockOut ? { scale: 0.98 } : {}}
                   onClick={handleAddToCart}
-                  className="w-full sm:flex-1 py-5 rounded-2xl ios-button-primary flex items-center justify-center gap-3"
+                  disabled={isStockOut}
+                  className={cn(
+                    "w-full sm:flex-1 py-5 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300",
+                    isStockOut ? "bg-black/10 text-black/20 cursor-not-allowed" : "ios-button-primary"
+                  )}
                 >
                   <ShoppingCart size={20} />
-                  Add to Cart
+                  {isStockOut ? 'Out of Stock' : 'Add to Cart'}
                 </motion.button>
               </div>
 

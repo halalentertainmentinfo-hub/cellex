@@ -981,192 +981,208 @@ export const AdminDashboard = () => {
         )}
       </div>
 
-      {/* Add Product Modal */}
+      {/* Add Product Modal - Full Page */}
       {isAddingProduct && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[100] bg-[var(--background)] overflow-y-auto">
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setIsAddingProduct(false)}
-          />
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="ios-card w-full max-w-lg p-10 relative z-10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="min-h-screen w-full p-6 sm:p-12 md:p-20"
           >
-            <h2 className="text-3xl font-bold mb-8 tracking-tight">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
-            <form onSubmit={handleSaveProduct} className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Product Name</label>
-                  <input 
-                    type="text" 
-                    required
-                    value={newProduct.name}
-                    onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
-                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Price (TK)</label>
-                  <input 
-                    type="number" 
-                    required
-                    value={newProduct.price}
-                    onChange={(e) => setNewProduct({...newProduct, price: Number(e.target.value)})}
-                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Brand</label>
-                  <input 
-                    type="text" 
-                    required
-                    value={newProduct.brand}
-                    onChange={(e) => setNewProduct({...newProduct, brand: e.target.value})}
-                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Product Image</label>
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 neu-inset rounded-xl overflow-hidden flex items-center justify-center bg-black/5">
-                    {newProduct.images[0] ? (
-                      <img src={newProduct.images[0]} alt="Preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <Package size={24} className="opacity-20" />
-                    )}
-                  </div>
-                  <label className="flex-1">
-                    <div className={cn(
-                      "neu-button py-3 px-4 text-xs font-bold text-center cursor-pointer transition-all",
-                      uploading && "opacity-50 cursor-not-allowed"
-                    )}>
-                      {uploading ? 'Processing...' : 'Choose Image'}
-                    </div>
-                    <input 
-                      type="file" 
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      disabled={uploading}
-                    />
-                  </label>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Battery (mAh)</label>
-                  <input 
-                    type="text" 
-                    value={newProduct.battery}
-                    onChange={(e) => setNewProduct({...newProduct, battery: e.target.value})}
-                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
-                    placeholder="e.g. 5000 mAh"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Display Size</label>
-                  <input 
-                    type="text" 
-                    value={newProduct.displaySize}
-                    onChange={(e) => setNewProduct({...newProduct, displaySize: e.target.value})}
-                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
-                    placeholder="e.g. 6.7 inch"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Colors (Comma separated - e.g. Black, White, Blue)</label>
-                <input 
-                  type="text" 
-                  value={newProduct.colors}
-                  onChange={(e) => setNewProduct({...newProduct, colors: e.target.value})}
-                  className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
-                  placeholder="Black, White, Blue"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">RAM Options (Comma separated - e.g. 4GB, 6GB, 8GB)</label>
-                  <input 
-                    type="text" 
-                    value={newProduct.ramOptions}
-                    onChange={(e) => setNewProduct({...newProduct, ramOptions: e.target.value})}
-                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
-                    placeholder="4GB, 6GB, 8GB"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Storage Options (Comma separated - e.g. 64GB, 128GB, 256GB)</label>
-                  <input 
-                    type="text" 
-                    value={newProduct.storageOptions}
-                    onChange={(e) => setNewProduct({...newProduct, storageOptions: e.target.value})}
-                    className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
-                    placeholder="64GB, 128GB, 256GB"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-4 neu-inset rounded-2xl">
-                <input 
-                  type="checkbox" 
-                  id="isFeatured"
-                  checked={newProduct.isFeatured}
-                  onChange={(e) => setNewProduct({...newProduct, isFeatured: e.target.checked})}
-                  className="w-5 h-5 rounded-lg accent-ios-orange"
-                />
-                <label htmlFor="isFeatured" className="text-sm font-bold opacity-60 cursor-pointer">Mark as Featured Product</label>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Description</label>
-                <textarea 
-                  required
-                  value={newProduct.description}
-                  onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
-                  className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all h-24 resize-none"
-                />
-              </div>
-              <div className="flex gap-4 pt-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center justify-between mb-12">
+                <h2 className="text-4xl sm:text-5xl font-display font-bold tracking-tight">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
                 <button 
-                  type="button"
                   onClick={() => {
                     setIsAddingProduct(false);
                     setEditingProduct(null);
-                    setNewProduct({
-                      name: '',
-                      price: 0,
-                      category: 'Smartphones',
-                      brand: '',
-                      images: [],
-                      specs: {},
-                      stock: 10,
-                      description: '',
-                      battery: '',
-                      displaySize: '',
-                      colors: '',
-                      ramOptions: '',
-                      storageOptions: '',
-                      isFeatured: false
-                    });
                   }}
-                  className="flex-1 ios-button-secondary py-4"
+                  className="w-12 h-12 neu-button flex items-center justify-center text-red-500"
                 >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  className="flex-1 ios-button-primary py-4"
-                >
-                  {editingProduct ? 'Save Changes' : 'Add Product'}
+                  <XCircle size={24} />
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleSaveProduct} className="space-y-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Product Name</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={newProduct.name}
+                      onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                      className="w-full neu-inset px-6 py-4 text-sm outline-none focus:border-ios-orange/50 transition-all rounded-2xl"
+                      placeholder="e.g. iPhone 15 Pro"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Price (TK)</label>
+                    <input 
+                      type="number" 
+                      required
+                      value={newProduct.price}
+                      onChange={(e) => setNewProduct({...newProduct, price: Number(e.target.value)})}
+                      className="w-full neu-inset px-6 py-4 text-sm outline-none focus:border-ios-orange/50 transition-all rounded-2xl"
+                      placeholder="e.g. 120000"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Brand</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={newProduct.brand}
+                      onChange={(e) => setNewProduct({...newProduct, brand: e.target.value})}
+                      className="w-full neu-inset px-6 py-4 text-sm outline-none focus:border-ios-orange/50 transition-all rounded-2xl"
+                      placeholder="e.g. Apple"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Stock Units (Available Quantity)</label>
+                    <input 
+                      type="number" 
+                      required
+                      min="0"
+                      value={newProduct.stock}
+                      onChange={(e) => setNewProduct({...newProduct, stock: Number(e.target.value)})}
+                      className="w-full neu-inset px-6 py-4 text-sm outline-none focus:border-ios-orange/50 transition-all rounded-2xl font-bold text-ios-orange"
+                      placeholder="e.g. 10"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Product Image</label>
+                  <div className="flex flex-col sm:flex-row items-center gap-6">
+                    <div className="w-32 h-32 neu-inset rounded-3xl overflow-hidden flex items-center justify-center bg-black/5 shrink-0">
+                      {newProduct.images[0] ? (
+                        <img src={newProduct.images[0]} alt="Preview" className="w-full h-full object-contain" />
+                      ) : (
+                        <Package size={40} className="opacity-20" />
+                      )}
+                    </div>
+                    <label className="w-full">
+                      <div className={cn(
+                        "neu-button py-6 px-8 text-sm font-bold text-center cursor-pointer transition-all rounded-2xl flex items-center justify-center gap-3",
+                        uploading && "opacity-50 cursor-not-allowed"
+                      )}>
+                        {uploading ? <RefreshCw size={20} className="animate-spin" /> : <Plus size={20} />}
+                        {uploading ? 'Processing Image...' : 'Upload Product Image'}
+                      </div>
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        disabled={uploading}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Battery (mAh)</label>
+                    <input 
+                      type="text" 
+                      value={newProduct.battery}
+                      onChange={(e) => setNewProduct({...newProduct, battery: e.target.value})}
+                      className="w-full neu-inset px-6 py-4 text-sm outline-none focus:border-ios-orange/50 transition-all rounded-2xl"
+                      placeholder="e.g. 5000 mAh"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Display Size</label>
+                    <input 
+                      type="text" 
+                      value={newProduct.displaySize}
+                      onChange={(e) => setNewProduct({...newProduct, displaySize: e.target.value})}
+                      className="w-full neu-inset px-6 py-4 text-sm outline-none focus:border-ios-orange/50 transition-all rounded-2xl"
+                      placeholder="e.g. 6.7 inch"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Colors (Comma separated)</label>
+                  <input 
+                    type="text" 
+                    value={newProduct.colors}
+                    onChange={(e) => setNewProduct({...newProduct, colors: e.target.value})}
+                    className="w-full neu-inset px-6 py-4 text-sm outline-none focus:border-ios-orange/50 transition-all rounded-2xl"
+                    placeholder="e.g. Black, White, Blue"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">RAM Options (Comma separated)</label>
+                    <input 
+                      type="text" 
+                      value={newProduct.ramOptions}
+                      onChange={(e) => setNewProduct({...newProduct, ramOptions: e.target.value})}
+                      className="w-full neu-inset px-6 py-4 text-sm outline-none focus:border-ios-orange/50 transition-all rounded-2xl"
+                      placeholder="e.g. 4GB, 6GB, 8GB"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Storage Options (Comma separated)</label>
+                    <input 
+                      type="text" 
+                      value={newProduct.storageOptions}
+                      onChange={(e) => setNewProduct({...newProduct, storageOptions: e.target.value})}
+                      className="w-full neu-inset px-6 py-4 text-sm outline-none focus:border-ios-orange/50 transition-all rounded-2xl"
+                      placeholder="e.g. 64GB, 128GB, 256GB"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 p-6 neu-inset rounded-3xl">
+                  <input 
+                    type="checkbox" 
+                    id="isFeatured"
+                    checked={newProduct.isFeatured}
+                    onChange={(e) => setNewProduct({...newProduct, isFeatured: e.target.checked})}
+                    className="w-6 h-6 rounded-lg accent-ios-orange"
+                  />
+                  <label htmlFor="isFeatured" className="text-sm font-bold opacity-60 cursor-pointer">Mark as Featured Product</label>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Description</label>
+                  <textarea 
+                    required
+                    value={newProduct.description}
+                    onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                    className="w-full neu-inset px-6 py-4 text-sm outline-none focus:border-ios-orange/50 transition-all h-40 resize-none rounded-3xl"
+                    placeholder="Describe the product features and details..."
+                  />
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-6 pt-10">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setIsAddingProduct(false);
+                      setEditingProduct(null);
+                    }}
+                    className="flex-1 neu-button py-6 text-sm font-bold uppercase tracking-widest text-red-500 rounded-2xl"
+                  >
+                    Discard Changes
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-1 ios-button-primary py-6 text-sm font-bold uppercase tracking-widest rounded-2xl"
+                  >
+                    {editingProduct ? 'Update Product' : 'Publish Product'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </motion.div>
         </div>
       )}

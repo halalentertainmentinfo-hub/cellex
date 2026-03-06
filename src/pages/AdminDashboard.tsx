@@ -608,9 +608,11 @@ export const AdminDashboard = () => {
                               <div key={i} className="text-[9px] opacity-40 leading-tight">
                                 {item.name} 
                                 {(item.selectedColor || item.selectedRam || item.selectedStorage) && (
-                                  <span className="text-ios-orange ml-1">
-                                    ({[item.selectedColor, item.selectedRam, item.selectedStorage].filter(Boolean).join('/')})
-                                  </span>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {item.selectedColor && <span className="px-1.5 py-0.5 bg-ios-orange/10 text-ios-orange rounded text-[8px] font-bold uppercase">{item.selectedColor}</span>}
+                                    {item.selectedRam && <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-400 rounded text-[8px] font-bold uppercase">{item.selectedRam}</span>}
+                                    {item.selectedStorage && <span className="px-1.5 py-0.5 bg-purple-500/10 text-purple-400 rounded text-[8px] font-bold uppercase">{item.selectedStorage}</span>}
+                                  </div>
                                 )}
                               </div>
                             ))}
@@ -1019,7 +1021,7 @@ export const AdminDashboard = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Colors (Comma separated)</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Colors (Comma separated - e.g. Black, White, Blue)</label>
                 <input 
                   type="text" 
                   value={newProduct.colors}
@@ -1030,23 +1032,23 @@ export const AdminDashboard = () => {
               </div>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">RAM Options (Comma separated)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">RAM Options (Comma separated - e.g. 4GB, 6GB, 8GB)</label>
                   <input 
                     type="text" 
                     value={newProduct.ramOptions}
                     onChange={(e) => setNewProduct({...newProduct, ramOptions: e.target.value})}
                     className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
-                    placeholder="8GB, 12GB"
+                    placeholder="4GB, 6GB, 8GB"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Storage Options (Comma separated)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Storage Options (Comma separated - e.g. 64GB, 128GB, 256GB)</label>
                   <input 
                     type="text" 
                     value={newProduct.storageOptions}
                     onChange={(e) => setNewProduct({...newProduct, storageOptions: e.target.value})}
                     className="w-full neu-inset px-4 py-3 text-sm outline-none focus:border-ios-orange/50 transition-all"
-                    placeholder="128GB, 256GB"
+                    placeholder="64GB, 128GB, 256GB"
                   />
                 </div>
               </div>

@@ -68,8 +68,8 @@ export const ProductDetail = () => {
   };
 
   return (
-    <div className="pt-32 pb-20 px-6 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+    <div className="pt-24 pb-20 px-4 sm:px-10 min-h-screen">
+      <div className="max-w-[1600px] mx-auto">
         {/* Back Button */}
         <button 
           onClick={() => navigate(-1)}

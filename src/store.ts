@@ -541,7 +541,10 @@ export const useOrderStore = create<OrderStore>()(
               items: o.order_items.map((item: any) => ({
                 ...item.products,
                 quantity: item.quantity,
-                price: Number(item.price_at_purchase)
+                price: Number(item.price_at_purchase),
+                selectedColor: item.selected_color,
+                selectedRam: item.selected_ram,
+                selectedStorage: item.selected_storage
               }))
             }));
             set({ orders: formattedOrders });
@@ -630,7 +633,10 @@ export const useOrderStore = create<OrderStore>()(
               order_id: order.id,
               product_id: item.id,
               quantity: item.quantity,
-              price_at_purchase: item.price
+              price_at_purchase: item.price,
+              selected_color: item.selectedColor,
+              selected_ram: item.selectedRam,
+              selected_storage: item.selectedStorage
             }));
 
             const { error: itemsError } = await supabase

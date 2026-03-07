@@ -466,7 +466,7 @@ export const useOrderRequestStore = create<OrderRequestStore>()(
               description: r.description,
               status: r.status,
               createdAt: r.created_at
-            })).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) });
+            })) });
           }
         } catch (error) {
           console.error('Error fetching requests:', error);
@@ -539,47 +539,41 @@ export const useOrderStore = create<OrderStore>()(
       fetchOrders: async () => {
         if (!supabase) return;
         try {
-          // Fetch orders
+          // Fetch orders and their items
           const { data: ordersData, error: ordersError } = await supabase
             .from('orders')
-            .select('*')
+            .select(`
+              *,
+              profiles (*),
+              order_items (
+                *,
+                products (*)
+              )
+            `)
             .order('created_at', { ascending: false });
 
           if (ordersError) throw ordersError;
 
           if (ordersData) {
-            // Fetch related data
-            const { data: profilesData } = await supabase.from('profiles').select('*');
-            const { data: orderItemsData } = await supabase.from('order_items').select('*');
-            const { data: productsData } = await supabase.from('products').select('*');
-
-            const formattedOrders: Order[] = ordersData.map((o: any) => {
-              const profile = profilesData?.find((p: any) => p.id === o.user_id);
-              const items = orderItemsData?.filter((i: any) => i.order_id === o.id) || [];
-              
-              return {
-                id: o.id,
-                invoiceNumber: o.invoice_number || `#${o.id.slice(0, 8).toUpperCase()}`,
-                userId: o.user_id,
-                userName: profile?.name || 'User',
-                userPhone: o.phone || profile?.phone || 'Not provided',
-                address: o.address || 'Not provided',
-                total: Number(o.total),
-                status: o.status.toUpperCase(),
-                createdAt: o.created_at,
-                items: items.map((item: any) => {
-                  const product = productsData?.find((p: any) => p.id === item.product_id);
-                  return {
-                    ...product,
-                    quantity: item.quantity,
-                    price: Number(item.price_at_purchase),
-                    selectedColor: item.selected_color,
-                    selectedRam: item.selected_ram,
-                    selectedStorage: item.selected_storage
-                  };
-                })
-              };
-            }).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            const formattedOrders: Order[] = ordersData.map((o: any) => ({
+              id: o.id,
+              invoiceNumber: o.invoice_number || `#${o.id.slice(0, 8).toUpperCase()}`,
+              userId: o.user_id,
+              userName: o.profiles?.name || 'User',
+              userPhone: o.phone || o.profiles?.phone || 'Not provided',
+              address: o.address || 'Not provided',
+              total: Number(o.total),
+              status: o.status.toUpperCase(),
+              createdAt: o.created_at,
+              items: o.order_items.map((item: any) => ({
+                ...item.products,
+                quantity: item.quantity,
+                price: Number(item.price_at_purchase),
+                selectedColor: item.selected_color,
+                selectedRam: item.selected_ram,
+                selectedStorage: item.selected_storage
+              }))
+            }));
             set({ orders: formattedOrders });
           }
         } catch (error) {
@@ -604,7 +598,7 @@ export const useOrderStore = create<OrderStore>()(
               items: io.items || [],
               total: io.total || 0,
               createdAt: io.created_at
-            })).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) });
+            })) });
           }
         } catch (error) {
           console.error('Error fetching incomplete orders:', error);
@@ -787,7 +781,7 @@ export const useNotificationStore = create<NotificationStore>()(
               read: n.read,
               views: n.views || Math.floor(Math.random() * 500) + 50,
               createdAt: n.created_at
-            })).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) });
+            })) });
           }
         } catch (error) {
           console.error('Error fetching notifications:', error);

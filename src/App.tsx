@@ -24,9 +24,10 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
 };
 
 export default function App() {
+  const { user, setUser } = useAuthStore();
   const { theme } = useThemeStore();
   const { fetchProducts } = useProductStore();
-  const { fetchUsers } = useUserStore();
+  const { fetchUsers, users } = useUserStore();
   const { fetchOrders } = useOrderStore();
   const { fetchRequests } = useOrderRequestStore();
   const { fetchNotifications } = useNotificationStore();
@@ -47,6 +48,15 @@ export default function App() {
     };
     initData();
   }, []);
+
+  React.useEffect(() => {
+    if (user && users.length > 0) {
+      const latestUser = users.find(u => u.id === user.id);
+      if (latestUser && JSON.stringify(latestUser) !== JSON.stringify(user)) {
+        setUser(latestUser);
+      }
+    }
+  }, [users, user, setUser]);
 
   React.useEffect(() => {
     const root = window.document.documentElement;

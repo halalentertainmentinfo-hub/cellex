@@ -1,11 +1,99 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+export const supabase = {
+  from: (table: string) => {
+    return {
+      select: (query?: string, options?: any) => {
+        let resultPromise = fetch(`/api/supabase/${table}/select`, { method: 'POST' }).then(res => res.json());
+        if (options?.count === 'exact') {
+          resultPromise = resultPromise.then(res => ({ data: res.data, error: res.error, count: res.data?.length || 0 }));
+        }
+        
+        const chainable = Object.assign(resultPromise, {
+          order: (col: string, opts?: any) => chainable,
+          single: async () => {
+            const result = await resultPromise;
+            return { data: result.data?.[0], error: result.error };
+          }
+        });
+        return chainable as any;
+      },
+      insert: (rows: any[]) => {
+        let resultPromise = fetch(`/api/supabase/${table}/insert`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(rows)
+        }).then(res => res.json());
 
-export const supabase = (supabaseUrl && supabaseAnonKey) 
-  ? createClient(supabaseUrl, supabaseAnonKey) 
-  : null;
+        const chainable = Object.assign(resultPromise, {
+          select: () => chainable,
+          single: async () => {
+            const result = await resultPromise;
+            return { data: result.data?.[0], error: result.error };
+          }
+        });
+        return chainable as any;
+      },
+      update: (data: any) => {
+        return {
+          eq: (col: string, val: string) => {
+            let resultPromise = fetch(`/api/supabase/${table}/update`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ data, eq: { col, val } })
+            }).then(res => res.json());
+
+            const chainable = Object.assign(resultPromise, {
+              select: () => chainable,
+              single: async () => {
+                const result = await resultPromise;
+                return { data: result.data?.[0], error: result.error };
+              }
+            });
+            return chainable as any;
+          },
+          neq: (col: string, val: string) => {
+            let resultPromise = fetch(`/api/supabase/${table}/update`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ data, neq: { col, val } })
+            }).then(res => res.json());
+            
+            return resultPromise as any;
+          }
+        };
+      },
+      delete: () => {
+        return {
+          eq: (col: string, val: string) => {
+            let resultPromise = fetch(`/api/supabase/${table}/delete`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ eq: { col, val } })
+            }).then(res => res.json());
+            return resultPromise as any;
+          },
+          neq: (col: string, val: string) => {
+            let resultPromise = fetch(`/api/supabase/${table}/delete`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ neq: { col, val } })
+            }).then(res => res.json());
+            return resultPromise as any;
+          }
+        };
+      },
+      upsert: (row: any) => {
+        let resultPromise = fetch(`/api/supabase/${table}/upsert`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(row)
+        }).then(res => res.json());
+        return resultPromise as any;
+      }
+    };
+  }
+};
 
 // Mock Data for fallback
 export const MOCK_PRODUCTS = [

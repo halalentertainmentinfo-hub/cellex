@@ -466,7 +466,7 @@ export const useOrderRequestStore = create<OrderRequestStore>()(
               description: r.description,
               status: r.status,
               createdAt: r.created_at
-            })) });
+            })).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) });
           }
         } catch (error) {
           console.error('Error fetching requests:', error);
@@ -539,41 +539,47 @@ export const useOrderStore = create<OrderStore>()(
       fetchOrders: async () => {
         if (!supabase) return;
         try {
-          // Fetch orders and their items
+          // Fetch orders
           const { data: ordersData, error: ordersError } = await supabase
             .from('orders')
-            .select(`
-              *,
-              profiles (*),
-              order_items (
-                *,
-                products (*)
-              )
-            `)
+            .select('*')
             .order('created_at', { ascending: false });
 
           if (ordersError) throw ordersError;
 
           if (ordersData) {
-            const formattedOrders: Order[] = ordersData.map((o: any) => ({
-              id: o.id,
-              invoiceNumber: o.invoice_number || `#${o.id.slice(0, 8).toUpperCase()}`,
-              userId: o.user_id,
-              userName: o.profiles?.name || 'User',
-              userPhone: o.phone || o.profiles?.phone || 'Not provided',
-              address: o.address || 'Not provided',
-              total: Number(o.total),
-              status: o.status.toUpperCase(),
-              createdAt: o.created_at,
-              items: o.order_items.map((item: any) => ({
-                ...item.products,
-                quantity: item.quantity,
-                price: Number(item.price_at_purchase),
-                selectedColor: item.selected_color,
-                selectedRam: item.selected_ram,
-                selectedStorage: item.selected_storage
-              }))
-            }));
+            // Fetch related data
+            const { data: profilesData } = await supabase.from('profiles').select('*');
+            const { data: orderItemsData } = await supabase.from('order_items').select('*');
+            const { data: productsData } = await supabase.from('products').select('*');
+
+            const formattedOrders: Order[] = ordersData.map((o: any) => {
+              const profile = profilesData?.find((p: any) => p.id === o.user_id);
+              const items = orderItemsData?.filter((i: any) => i.order_id === o.id) || [];
+              
+              return {
+                id: o.id,
+                invoiceNumber: o.invoice_number || `#${o.id.slice(0, 8).toUpperCase()}`,
+                userId: o.user_id,
+                userName: profile?.name || 'User',
+                userPhone: o.phone || profile?.phone || 'Not provided',
+                address: o.address || 'Not provided',
+                total: Number(o.total),
+                status: o.status.toUpperCase(),
+                createdAt: o.created_at,
+                items: items.map((item: any) => {
+                  const product = productsData?.find((p: any) => p.id === item.product_id);
+                  return {
+                    ...product,
+                    quantity: item.quantity,
+                    price: Number(item.price_at_purchase),
+                    selectedColor: item.selected_color,
+                    selectedRam: item.selected_ram,
+                    selectedStorage: item.selected_storage
+                  };
+                })
+              };
+            }).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
             set({ orders: formattedOrders });
           }
         } catch (error) {
@@ -598,7 +604,7 @@ export const useOrderStore = create<OrderStore>()(
               items: io.items || [],
               total: io.total || 0,
               createdAt: io.created_at
-            })) });
+            })).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) });
           }
         } catch (error) {
           console.error('Error fetching incomplete orders:', error);
@@ -756,11 +762,11 @@ interface NotificationStore {
   notifications: Notification[];
   fetchNotifications: () => Promise<void>;
   addNotification: (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => Promise<void>;
-  markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
-  incrementViewCount: (id: string, userId?: string) => void;
-  deleteNotification: (id: string) => void;
-  clearAll: () => void;
+  markAsRead: (id: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
+  incrementViewCount: (id: string, userId?: string) => Promise<void>;
+  deleteNotification: (id: string) => Promise<void>;
+  clearAll: () => Promise<void>;
 }
 
 export const useNotificationStore = create<NotificationStore>()(
@@ -781,7 +787,7 @@ export const useNotificationStore = create<NotificationStore>()(
               read: n.read,
               views: n.views || Math.floor(Math.random() * 500) + 50,
               createdAt: n.created_at
-            })) });
+            })).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) });
           }
         } catch (error) {
           console.error('Error fetching notifications:', error);
@@ -820,37 +826,78 @@ export const useNotificationStore = create<NotificationStore>()(
         };
         set({ notifications: [newNotif, ...get().notifications] });
       },
-      markAsRead: (id) => {
+      markAsRead: async (id) => {
+        if (supabase) {
+          try {
+            await supabase.from('notifications').update({ read: true }).eq('id', id);
+          } catch (error) {
+            console.error('Error marking notification as read:', error);
+          }
+        }
         set({
           notifications: get().notifications.map((n) =>
             n.id === id ? { ...n, read: true } : n
           ),
         });
       },
-      markAllAsRead: () => {
+      markAllAsRead: async () => {
+        if (supabase) {
+          try {
+            await supabase.from('notifications').update({ read: true }).neq('read', true as any);
+          } catch (error) {
+            console.error('Error marking all notifications as read:', error);
+          }
+        }
         set({
           notifications: get().notifications.map((n) => ({ ...n, read: true })),
         });
       },
-      incrementViewCount: (id, userId) => {
-        set({
-          notifications: get().notifications.map((n) => {
-            if (n.id === id) {
-              const viewedBy = n.viewedBy || [];
-              if (userId && !viewedBy.includes(userId)) {
-                return { ...n, views: (n.views || 0) + 1, viewedBy: [...viewedBy, userId] };
-              }
+      incrementViewCount: async (id, userId) => {
+        const n = get().notifications.find(n => n.id === id);
+        if (!n) return;
+
+        const viewedBy = n.viewedBy || [];
+        if (userId && !viewedBy.includes(userId)) {
+          const newViews = (n.views || 0) + 1;
+          const newViewedBy = [...viewedBy, userId];
+          
+          if (supabase) {
+            try {
+              await supabase.from('notifications').update({ views: newViews, viewedBy: newViewedBy }).eq('id', id);
+            } catch (error) {
+              console.error('Error incrementing view count:', error);
             }
-            return n;
-          }),
-        });
+          }
+
+          set({
+            notifications: get().notifications.map((n) =>
+              n.id === id ? { ...n, views: newViews, viewedBy: newViewedBy } : n
+            ),
+          });
+        }
       },
-      deleteNotification: (id) => {
+      deleteNotification: async (id) => {
+        if (supabase) {
+          try {
+            await supabase.from('notifications').delete().eq('id', id);
+          } catch (error) {
+            console.error('Error deleting notification:', error);
+          }
+        }
         set({
           notifications: get().notifications.filter((n) => n.id !== id),
         });
       },
-      clearAll: () => set({ notifications: [] }),
+      clearAll: async () => {
+        if (supabase) {
+          try {
+            await supabase.from('notifications').delete().neq('id', '0'); // Delete all
+          } catch (error) {
+            console.error('Error clearing notifications:', error);
+          }
+        }
+        set({ notifications: [] });
+      },
     }),
     {
       name: 'cellex-notifications',
